@@ -1,13 +1,34 @@
 import React from "react";
+import AuthProvider from "./auth/authProvider";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import PrivateRoute from "./router/route";
+import Login from "./pages/login";
+import Dashboard from "./pages/dashboard";
+import UserProvider from "./context/usersProvides";
+import OrgProvider from "./context/orgsProvider";
+import PeProvider from "./context/processingElementsProvider";
 // import { getRuntimeConfig } from "./runtimeConfig";
 
 export default function App() {
   // const { orgName, apiBaseUrl } = getRuntimeConfig();
   return (
-    <div style={{ padding: 16 }}>
-      {/* <h1>{orgName} Console</h1> */}
-      {/* <small>API: {apiBaseUrl}</small> */}
-      <h1 className="text-red-500 text-5xl">hello</h1>
-    </div>
+    <Router>
+      <AuthProvider>
+        <UserProvider>
+          <OrgProvider>
+            <PeProvider>
+              <Routes>
+                <Route path="/" element={<Navigate to="/login" />} />
+                <Route path="/login" element={<Login />} />
+                {/* <Route exact path="/signup" element={<SignUp />} /> */}
+                <Route element={<PrivateRoute />}>
+                  <Route path="/dashboard/*" element={<Dashboard />} />
+                </Route>
+              </Routes>
+            </PeProvider>
+          </OrgProvider>
+        </UserProvider>
+      </AuthProvider>
+    </Router>
   );
 }
