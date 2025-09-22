@@ -7,6 +7,7 @@ import Dashboard from "./pages/dashboard";
 import UserProvider from "./context/usersProvides";
 import OrgProvider from "./context/orgsProvider";
 import PeProvider from "./context/processingElementsProvider";
+import AccessRequestProvider from "./context/accessRequestsProvider";
 // import { getRuntimeConfig } from "./runtimeConfig";
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
         <UserProvider>
           <OrgProvider>
             <PeProvider>
+              <AccessRequestProvider>
               <Routes>
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/login" element={<Login />} />
@@ -25,6 +27,7 @@ export default function App() {
                   <Route path="/dashboard/*" element={<Dashboard />} />
                 </Route>
               </Routes>
+              </AccessRequestProvider>
             </PeProvider>
           </OrgProvider>
         </UserProvider>

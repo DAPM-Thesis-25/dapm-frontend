@@ -5,6 +5,9 @@ import Navbar from "../components/navbar";
 import Users from "./users";
 import Partners from "./partners";
 import ProcessingElements from "./processingElements";
+import AccessRequests from "./accessRequest";
+import AccessRequestPage from "./accessRequest";
+
 export default function Dashboard() {
     const [size, setSize] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +33,7 @@ export default function Dashboard() {
     return(
         <div className="h-screen md:flex md:justify-between ">
             <SideBar isOpen={isOpen} size={size} setIsOpen={setIsOpen} />
-            <div className={`grow flex flex-col sm:h-full  transition-all duration-300 ease-in-out `}>
+            <div className={`grow flex flex-col h-full  transition-all duration-300 ease-in-out `}>
                 
                 <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} />
                 <Routes>
@@ -38,6 +41,7 @@ export default function Dashboard() {
                     <Route path="users" element={<Users />} />
                     <Route path="partners" element={<Partners />} />
                     <Route path="processing-elements" element={<ProcessingElements />} />
+                    <Route path="access-requests" element={<AccessRequestPage />} />
                 </Routes>
             </div>
         </div>

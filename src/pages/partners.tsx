@@ -26,8 +26,9 @@ export default function Partners() {
     }
 
     return (
+        // lg:mt-[5%] sm:mt-[10%] mt-[12%]
         <div className="w-full h-screen overflow-y-auto pb-10 ">
-            <div className="w-full bg-white md:p-7 p-5 shadow-md lg:mt-[5%] sm:mt-[10%] mt-[12%] flex justify-between">
+            <div className="w-full bg-white md:p-7 p-5 shadow-md  flex justify-between">
                 <h1 className="text-2xl font-semibold">Partners</h1>
                 {
                     authUser.userData?.orgRole == "ADMIN" && <div className=""><HandshakeButton /></div>
@@ -104,9 +105,12 @@ export default function Partners() {
                 </div>
             )}
 
-            {orgData.publishers && orgData.publishers.length === 0 && (
+            {
+            orgData.publishers ? orgData.publishers.length === 0 
+            : orgData.subscribers ? orgData.subscribers.length === 0
+            && (
                 <div className="w-full grow flex  md:p-7 p-5 text-2xl text-[#] font-semibold justify-center items-center">No Partner Available</div>
-            )}
+            ) : null}
         </div>
     )
 }

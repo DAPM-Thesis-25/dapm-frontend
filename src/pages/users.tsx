@@ -31,9 +31,10 @@ export default function Users() {
     }
 
     return (
-        <div className="w-full">
+        <div className="w-full h-screen overflow-y-auto pb-10">
             {/* <Header title="Users" button={<AddMemberButton/>} /> */}
-            <div className="w-full bg-white md:p-7 p-5 shadow-md lg:mt-[5%] sm:mt-[10%] mt-[12%] flex justify-between">
+            {/* lg:mt-[5%] sm:mt-[10%] mt-[12%] */}
+            <div className="w-full bg-white md:p-7 p-5 shadow-md  flex justify-between">
                 <h1 className="text-2xl font-semibold">Users</h1>
                 {
                     authUser.userData?.orgRole == "ADMIN" && <div className=""><AddMemberButton /></div>
