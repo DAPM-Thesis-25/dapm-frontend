@@ -7,7 +7,7 @@ export interface ProcessingElement {
   inputs: string[];
   output: string;
   hostURL: string;
-  tier:  "FREE" | "BASIC" | "PREMIUM" | "PRIVATE"; // extend as needed
+  tier:  "FREE" | "BASIC" | "PREMIUM" | "PRIVATE";
 }
 
 

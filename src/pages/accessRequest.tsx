@@ -1,6 +1,7 @@
 import { SetStateAction, useEffect, useState } from "react";
 import { useAccessRequest } from "../context/accessRequestsProvider";
 import type { AccessRequest } from "../api/accessRequests";
+import TakeDecisionPopup from "../components/accessReq/takeDecisionPopup";
 
 export default function AccessRequestPage() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -9,6 +10,8 @@ export default function AccessRequestPage() {
     const [accessRequests, setAccessRequests] = useState<AccessRequest[]>([]);
     const acc = useAccessRequest();
     const usersPerPage = 5;
+    const [openTakeDecisionPopup, setOpenTakeDecisionPopup] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState<AccessRequest | null>(null);
 
 
 
@@ -40,7 +43,7 @@ export default function AccessRequestPage() {
         // acc.getExternalRequests();
         // merge internal and external access requests
         // setAccessRequests([... (acc.accessRequests || []), ...(acc.externalAccessRequests || [])]);
-    }, []);
+    }, [acc.takingDecisionLoading]);
     return (<div className="w-full">
         {/* lg:mt-[5%] sm:mt-[10%] mt-[12%] */}
         {/* <Header title="Users" button={<AddMemberButton/>} /> */}
@@ -51,16 +54,19 @@ export default function AccessRequestPage() {
             } */}
         </div>
         <div className="my-table flex flex-wrap w-full mt-5 md:p-7 p-5">
-            <div className="text-center text-white p-2 table-header grid grid-cols-4 gap-2 w-full bg-[#292929] border-2 rounded border-white">
+            <div className="text-center text-white p-2 table-header grid grid-cols-3 gap-2 w-full bg-[#292929] border-2 rounded border-white">
                 <div className="table-header-item ">Org</div>
                 <div className="table-header-item ">requestedDurationHours</div>
                 <div className="table-header-item ">Status</div>
-                <div className="table-header-item ">Pipeline</div>
+                {/* <div className="table-header-item ">Pipeline</div> */}
                 {/* <div className="table-header-item">Description</div> */}
             </div>
             <div className="table-body w-full ">
                 {currentAccessRequests.length ? currentAccessRequests.map((request) => (
-                    <div className="text-center text-black p-2 table-header w-full grid grid-cols-4  table-tr rounded  mt-2 drop-shadow-2xl">
+                    <div onClick={() => {
+                        setSelectedRequest(request);
+                        setOpenTakeDecisionPopup(true);
+                    }} className="text-center cursor-pointer text-black p-2 table-header w-full grid grid-cols-3  table-tr rounded  mt-2 drop-shadow-2xl">
                         <div className="table-row-item ">{request.organization}</div>
                         <div className="table-row-item ">
                             {/* <select
@@ -83,16 +89,11 @@ export default function AccessRequestPage() {
                         <div className="table-row-item  ">
                             <span className={`px-2 py-1 rounded-xl text-sm ${request.status === "PENDING" ? "bg-yellow-500" : request.status === "APPROVED" ? "bg-green-500" : "bg-red-500"}`}>{request.status}</span>
                         </div>
-                        <div className="table-row-item  ">{request.pipelineName}</div>
-                        {/* <div className="table-row-item ">{request.approvalToken? <span className="text-green-500"></span> : <span className="text-red-500">{request.approvalToken}</span>}</div> */}
-                        {/* <DeleteMemberPopup id={user.id} handleDelete={handleDelete} openDeleteMemberPopup={openDeleteMemberPopup} setOpenDeleteMemberPopup={setOpenDeleteMemberPopup}></DeleteMemberPopup> */}
-                        {/* {   !(auth?.user?.role === "Admin" && (user.role === "Admin"||user.role === "SuperAdmin") )?
-                                : <p className="text-red-400">No permission</p>
-                            } */}
+                        {/* <div className="table-row-item  ">{request.pipelineName}</div> */}
                     </div>
                 )) : (
                     <div className="table-row  w-full">
-                        <div className="table-row-item w-full text-center">Loading...</div>
+                        <div className="table-row-item w-full text-center">No requests</div>
                     </div>
                 )}
             </div>
@@ -107,6 +108,14 @@ export default function AccessRequestPage() {
                 disabled={currentPage === totalPages}
                 className={`px-2 py-1 w-24 bg-green-600 rounded-xl text-white ml-2 text-sm ${currentPage === totalPages ? "bg-slate-400" : ""}`}>Next</button>
         </div>
+
+        {selectedRequest && (
+            <TakeDecisionPopup
+                accessREq={selectedRequest}
+                openTakeDecisionPopup={openTakeDecisionPopup}
+                setOpenTakeDecisionPopup={setOpenTakeDecisionPopup}
+            />
+        )}
 
     </div>
     );

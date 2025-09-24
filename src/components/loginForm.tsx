@@ -39,18 +39,18 @@ export default function LoginForm(){
     },
   });
     return(
-        <form className="sm:h-[90%]  h-[65%]  login flex  flex-col w-full" onSubmit={formik.handleSubmit}>
+        <form className="sm:h-[90%]  h-[65%]  login login2 flex  flex-col w-full" onSubmit={formik.handleSubmit}>
 
 
 
 
             <div className="  w-full flex flex-col h-fit items-start content-start xl:mt-18 lg:mt-15">
-                <div className="login-input h-fit relative border-2 p-1 border-white w-full sm:mt-6 mt-10 flex items-center sm:rounded-none rounded-md">
-                    <PersonIcon className=" text-white "></PersonIcon>
+                <div className="login-input h-fit relative border-2 p-1 border-[#15283c] w-full sm:mt-6 mt-10 flex items-center sm:rounded-none rounded-md">
+                    <PersonIcon className=" text-[#15283c] "></PersonIcon>
                     <input
                         type="text"
                         placeholder="Username"
-                        className="w-full  h-fit pl-2  bg-transparent text-white"
+                        className="w-full  h-fit pl-2  bg-transparent text-[#15283c]"
                         name="username"
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
@@ -69,12 +69,12 @@ export default function LoginForm(){
 
 
             <div className="w-full flex flex-col">
-            <div className="login-input relative  border-2 p-1 border-white  w-full  sm:mt-6 mt-2 flex items-center sm:rounded-none rounded-md">
-                <PasswordIcon className=" text-white "></PasswordIcon>
+            <div className="login-input relative  border-2 p-1 border-[#15283c]  w-full  sm:mt-6 mt-2 flex items-center sm:rounded-none rounded-md">
+                <PasswordIcon className=" text-[#15283c] "></PasswordIcon>
                 <input
-                    type="text"
+                    type="password"
                     placeholder="Password"
-                    className="w-full  pl-2  bg-transparent text-white"
+                    className="w-full  pl-2  bg-transparent text-[#15283c]"
                     name="password"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -91,12 +91,12 @@ export default function LoginForm(){
             </div>
 
             <div className="w-full flex flex-col">
-            <div className="login-input relative  border-2 p-1 border-white  w-full  sm:mt-6 mt-2 flex items-center sm:rounded-none rounded-md">
-                <DomainIcon className=" text-white "></DomainIcon>
+            <div className="login-input relative  border-2 p-1 border-[#15283c]  w-full  sm:mt-6 mt-2 flex items-center sm:rounded-none rounded-md">
+                <DomainIcon className=" text-[#15283c] "></DomainIcon>
                 <input
                     type="text"
                     placeholder="orgDomainName"
-                    className="w-full  pl-2  bg-transparent text-white"
+                    className="w-full  pl-2  bg-transparent text-[#15283c]"
                     name="orgDomainName"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -112,9 +112,6 @@ export default function LoginForm(){
                 } */}
             </div>
 
-            {/* <p className="text-base mt-4   text-[#ffffff4d] text-center w-full">
-                Do Not Have an Account? <span onClick={()=>navigate("/login")} className="text-white">login</span>
-            </p> */}
             <div className="w-full flex items-end grow justify-self-end   justify-center mt-6">
                 <button type="submit" className="text-white text-xl sm:w-fit w-full sm:px-10 p-2 px-6 sm:bg-[#ff5722] bg-[#ff5722] rounded-md">Login</button>
 

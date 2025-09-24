@@ -29,6 +29,11 @@ body {
     outline: none;
   }
 
+   /* Login Page Styles */
+.login2 input::placeholder{
+    color: #66788b;
+}
+
 
 
 /* sidebar styles */
