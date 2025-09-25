@@ -22,7 +22,7 @@ export default function Users() {
         else if (authUser.userData?.orgRole == "MEMBER") {
             userData.getAdmins();
         }
-    }, [userData.loadingRegister]);
+    }, [userData.loadingRegister, authUser.userData]);
 
     function randomeProfile() {
         const profiles = [userprofile1, userprofile2, userprofile3, userprofile4, userprofile5, userprofile6];

@@ -19,7 +19,6 @@ const ProcessingElementPopup: React.FC<ProcessingElementPopupProps> = ({ openPro
 
     return (
         <Dialog open={openProcessingElementPopup} onClose={() => setOpenProcessingElementPopup(false)} className="relative z-40 ">
-
             <div className="fixed inset-0 flex w-screen items-center justify-center sm:p-4 backdrop-blur-md 
             ">
                 <DialogPanel className="relative sm:h-fit h-full space-y-4 border  bg-[#15283c] p-12 rounded sm:border-solid border-white border-none">

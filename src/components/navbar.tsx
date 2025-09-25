@@ -85,7 +85,7 @@ export default function Navbar({ isOpen, setIsOpen, size }: { isOpen: boolean; s
                 <MenuIcon onClick={() => toggleSideBar()} className="md:hidden  block text-white cursor-pointer " ></MenuIcon>
             </div>
 
-            <p className="text-white font-bold sm:hidden static">DAMP</p>
+            {/* <p className="text-white font-bold sm:hidden static">DAMP</p> */}
 
             <div className='flex items-center'>
                 <div className='relative w-fit  px-3'>

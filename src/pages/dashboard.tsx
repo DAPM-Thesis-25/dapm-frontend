@@ -7,6 +7,8 @@ import Partners from "./partners";
 import ProcessingElements from "./processingElements";
 import AccessRequests from "./accessRequest";
 import AccessRequestPage from "./accessRequest";
+import Projects from "./projects";
+import ProjectLayout from "./project.tsx/ProjectLayot";
 
 export default function Dashboard() {
     const [size, setSize] = useState(false);
@@ -30,11 +32,11 @@ export default function Dashboard() {
         };
     }, []);
 
-    return(
+    return (
         <div className="h-screen md:flex md:justify-between ">
             <SideBar isOpen={isOpen} size={size} setIsOpen={setIsOpen} />
             <div className={`grow flex flex-col h-full  transition-all duration-300 ease-in-out `}>
-                
+
                 <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} />
                 <Routes>
                     <Route path="/" element={<Navigate to="users" />} />
@@ -42,6 +44,8 @@ export default function Dashboard() {
                     <Route path="partners" element={<Partners />} />
                     <Route path="processing-elements" element={<ProcessingElements />} />
                     <Route path="access-requests" element={<AccessRequestPage />} />
+                    <Route path="projects" element={<Projects />} />
+                    <Route path="projects/:projectName/*" element={<ProjectLayout />} />
                 </Routes>
             </div>
         </div>

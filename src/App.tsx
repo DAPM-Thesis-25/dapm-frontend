@@ -8,6 +8,7 @@ import UserProvider from "./context/usersProvides";
 import OrgProvider from "./context/orgsProvider";
 import PeProvider from "./context/processingElementsProvider";
 import AccessRequestProvider from "./context/accessRequestsProvider";
+import ProjectProvider from "./context/projectProvider";
 // import { getRuntimeConfig } from "./runtimeConfig";
 
 export default function App() {
@@ -19,14 +20,16 @@ export default function App() {
           <OrgProvider>
             <PeProvider>
               <AccessRequestProvider>
-              <Routes>
-                <Route path="/" element={<Navigate to="/login" />} />
-                <Route path="/login" element={<Login />} />
-                {/* <Route exact path="/signup" element={<SignUp />} /> */}
-                <Route element={<PrivateRoute />}>
-                  <Route path="/dashboard/*" element={<Dashboard />} />
-                </Route>
-              </Routes>
+                <ProjectProvider>
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/login" />} />
+                    <Route path="/login" element={<Login />} />
+                    {/* <Route exact path="/signup" element={<SignUp />} /> */}
+                    <Route element={<PrivateRoute />}>
+                      <Route path="/dashboard/*" element={<Dashboard />} />
+                    </Route>
+                  </Routes>
+                </ProjectProvider>
               </AccessRequestProvider>
             </PeProvider>
           </OrgProvider>
