@@ -28,6 +28,13 @@ export interface ConfigureValidation{
     missingPermissions: any[];
 }
 
+export interface PipelineListItem {
+  pipelineName: string;
+  pipelinePhase: "VALIDATED" | "DRAFT" | "CONFIGURED" | "BUILT" | "EXECUTING" | "TERMINATED" ;
+  processingElementIds: string[];
+  projectName: string;
+}
+
 export const designPipeline = (orgDomainName: string, data: DesignPipeline) => 
     axiosInstance.post<any>(`/api/pipeline/validation/design-pipeline`, data,
     { baseURL: `http://localhost:${orgDomainName}` } );
@@ -46,4 +53,13 @@ export const terminatePipeline = (orgDomainName: string, pipelineName: string) =
 
 export const checkConfigureStatusPipeline = (orgDomainName: string, pipelineName: string) => 
     axiosInstance.get<any>(`/api/pipeline/configuration?pipelineName=${pipelineName}/configuration-status`,
+    { baseURL: `http://localhost:${orgDomainName}` } );
+
+export const getPipelines = (orgDomainName: string, projectName: string) =>
+  axiosInstance.get<PipelineListItem[]>(`/api/pipelines/${projectName}`, {
+    baseURL: `http://localhost:${orgDomainName}`,
+  });
+
+export const getValidatedPipeline = (orgDomainName: string, pipelineName: string) => 
+    axiosInstance.get<any>(`/api/pipeline/validation/${pipelineName}`,
     { baseURL: `http://localhost:${orgDomainName}` } );

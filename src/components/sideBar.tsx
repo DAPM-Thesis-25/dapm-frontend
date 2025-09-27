@@ -125,7 +125,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
     return (
         // bg-[url(./imgs/login-bg.jpg)]
 
-        <div className={`xl:w-[20%] lg:w-[20%] md:w-[17%] h-full w-full   md:static transition-transform transform absolute z-10   bg-[#15283c] sidebar h-screen overflow-y-auto pb-10  ${isOpen ? 'translate-x-0 ' : '-translate-x-full '} `}>
+        <div className={`xl:w-[20%] lg:w-[20%] md:w-[17%]  w-full   md:static transition-transform transform absolute z-10   bg-[#15283c] sidebar h-screen overflow-y-auto pb-10  ${isOpen ? 'translate-x-0 ' : '-translate-x-full '} `}>
             <div className="text-center text-white sm:text-2xl font-bold sidebar-title text-5xl h-[14%] bg-[#214162] flex items-center px-6 md:static  w-full">
                 <img src={profile} className="h-16 w-16 rounded-full lg:flex md:hidden flex" alt="logo" />
                 <div className="flex flex-col items-start justify-center 2xl:ml-7 xl:ml-3 lg:ml-2 md:ml-0 ml-4">

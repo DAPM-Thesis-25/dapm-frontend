@@ -31,6 +31,7 @@ const CreateProcessingElement: React.FC<CreateProcessingElementFormProps> = ({ s
             template: null as File | null,
             configSchema: null as File | null,
             tier: "",
+            processingElementType: "",
             output: "",
             inputs: [] as string[],
         },
@@ -40,6 +41,8 @@ const CreateProcessingElement: React.FC<CreateProcessingElementFormProps> = ({ s
             tier: Yup.string().required("Tier is required"),
             output: Yup.string().optional(),
             inputs: Yup.array().of(Yup.string()).optional(),
+            processingElementType: Yup.string().required("Processing Element Type is required"),
+
         }),
         onSubmit: async (values, { resetForm }) => {
             pe.setLoadingProcessingElement(true);
@@ -48,6 +51,7 @@ const CreateProcessingElement: React.FC<CreateProcessingElementFormProps> = ({ s
                 template: values.template!,
                 configSchema: values.configSchema!,
                 tier: values.tier as "FREE" | "BASIC" | "PREMIUM" | "ENTERPRISE",
+                processingElementType: values.processingElementType as "SOURCE" | "SINK" | "OPERATOR",
                 output: values.output || undefined,
                 inputs: values.inputs,
             });
@@ -197,6 +201,29 @@ const CreateProcessingElement: React.FC<CreateProcessingElementFormProps> = ({ s
 
                     </div>
 
+                </div>
+                <div className=" sm:w-[48%] w-full flex flex-col h-fit items-start content-start mb-2">
+                    <h4 className="text-sm font-bold text-[#ffffff4d] ">Type</h4>
+                    <div className="signup-input h-fit relative border-2 p-1 border-white  w-full  flex items-center sm:rounded-none rounded-md">
+                        <CardMembershipIcon className=" text-white "></CardMembershipIcon>
+
+                        <select
+                            // placeholder=""
+                            className="w-full p-0 select priority-select  bg-[#15283c] border-none focus:border-none text-white"
+                            name="processingElementType"
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            value={formik.values.processingElementType}
+                            aria-label="Project status">
+                            <option value="">Select Type</option>
+                            <option value="SOURCE">SOURCE</option>
+                            <option value="SINK">SINK</option>
+                            <option value="OPERATOR">OPERATOR</option>
+                        </select>
+                    </div>
+                    {formik.touched.processingElementType && formik.errors.processingElementType ? (
+                        <div className="text-red-500 text-xs text-start mt-1">{formik.errors.processingElementType}</div>
+                    ) : null}
                 </div>
             </div>
 

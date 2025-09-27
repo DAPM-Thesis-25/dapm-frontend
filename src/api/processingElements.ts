@@ -8,6 +8,7 @@ export interface ProcessingElement {
   output: string;
   hostURL: string;
   tier:  "FREE" | "BASIC" | "PREMIUM" | "PRIVATE";
+  processingElementType: "SOURCE" | "SINK" | "OPERATOR";
 }
 
 
@@ -16,7 +17,7 @@ export interface UploadProcessingElementRequest {
   template: File;              
   configSchema: File;          
   tier: "FREE" | "BASIC" | "PREMIUM" | "ENTERPRISE"; 
-         
+  processingElementType: "SOURCE" | "SINK" | "OPERATOR";
   output?: string ;           
   inputs?: string[];           
 }
@@ -36,6 +37,7 @@ function buildPEFormData(data: UploadProcessingElementRequest): FormData {
   formData.append("template", data.template);
   formData.append("configSchema", data.configSchema);
   formData.append("tier", data.tier);
+  formData.append("processingElementType", data.processingElementType);
 
   if (data.output) {
     formData.append("output", data.output);

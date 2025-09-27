@@ -26,7 +26,6 @@ export default function App() {
                   <Routes>
                     <Route path="/" element={<Navigate to="/login" />} />
                     <Route path="/login" element={<Login />} />
-                    {/* <Route exact path="/signup" element={<SignUp />} /> */}
                     <Route element={<PrivateRoute />}>
                       <Route path="/dashboard/*" element={<Dashboard />} />
                     </Route>

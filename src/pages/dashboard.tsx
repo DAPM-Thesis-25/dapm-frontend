@@ -9,11 +9,12 @@ import AccessRequests from "./accessRequest";
 import AccessRequestPage from "./accessRequest";
 import Projects from "./projects";
 import ProjectLayout from "./project.tsx/ProjectLayout";
+import PipelineNavbar from "../components/pipeline/pipelineNavbar";
 
 export default function Dashboard() {
     const [size, setSize] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-
+    const location = useLocation();
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth <= 768) {
@@ -32,12 +33,19 @@ export default function Dashboard() {
         };
     }, []);
 
+    const hideSidebar = location.pathname.includes("/pipelines/")
+        && location.pathname.split("/").length > 5;
+
     return (
         <div className="h-screen md:flex md:justify-between ">
-            <SideBar isOpen={isOpen} size={size} setIsOpen={setIsOpen} />
+            {(!hideSidebar) &&
+                <SideBar isOpen={isOpen} size={size} setIsOpen={setIsOpen} />
+
+            }
             <div className={`grow flex flex-col h-full  transition-all duration-300 ease-in-out `}>
 
-                <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} />
+                {(!hideSidebar) ? <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} /> : <PipelineNavbar />}
+                {/* <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} /> */}
                 <Routes>
                     <Route path="/" element={<Navigate to="users" />} />
                     <Route path="users" element={<Users />} />

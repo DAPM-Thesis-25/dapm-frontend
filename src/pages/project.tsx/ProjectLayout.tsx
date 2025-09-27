@@ -3,6 +3,9 @@ import Members from "./members";
 import { use, useEffect, useState } from "react";
 import { useAuth } from "../../auth/authProvider";
 import { useProject } from "../../context/projectProvider";
+import PipelineBuilder from "./pipeline";
+import Pipelines from "./pipeline";
+import PipelineDesign from "../../components/pipeline/pipelineDesign";
 
 export default function ProjectLayout() {
     const location = useLocation();
@@ -38,11 +41,8 @@ export default function ProjectLayout() {
             <Routes>
                 <Route path="/" element={<Navigate to="members" />} />
                 <Route path="members" element={<Members />} />
-                {/* <Route path="partners" element={<Partners />} />
-                    <Route path="processing-elements" element={<ProcessingElements />} />
-                    <Route path="access-requests" element={<AccessRequestPage />} />
-                    <Route path="projects" element={<Projects />} />
-                    <Route path="projects/:projectName/*" element={<ProjectLayout />} /> */}
+                <Route path="pipelines" element={<Pipelines />} />
+                <Route path="pipelines/:name" element={<PipelineDesign />} />
             </Routes>
         </>
     )
