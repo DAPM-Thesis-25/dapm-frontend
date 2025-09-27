@@ -8,7 +8,7 @@ import ProcessingElements from "./processingElements";
 import AccessRequests from "./accessRequest";
 import AccessRequestPage from "./accessRequest";
 import Projects from "./projects";
-import ProjectLayout from "./project.tsx/ProjectLayot";
+import ProjectLayout from "./project.tsx/ProjectLayout";
 
 export default function Dashboard() {
     const [size, setSize] = useState(false);

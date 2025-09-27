@@ -21,7 +21,7 @@ export default function CreateProjPopup({ openCreateProjectPopup, setOpenCreateP
 
             <div className="fixed inset-0 flex w-screen items-center justify-center sm:p-4 backdrop-blur-md 
             ">
-                <DialogPanel className="relative sm:w-[60%] w-full sm:h-fit h-full space-y-4 border  bg-[#15283c] sm:p-12 p-4 rounded sm:border-solid border-white border-none">
+                <DialogPanel className="relative lg:w-[60%] md:w-[80%] w-full sm:h-fit h-full space-y-4 border  bg-[#15283c] sm:p-12 p-4 rounded sm:border-solid border-white border-none">
                     <CloseIcon onClick={() => setOpenCreateProjectPopup(false)} className="cursor-pointer absolute text-white right-5 top-5"></CloseIcon>
 
                     <DialogTitle className="font-bold text-white sm:text-3xl text-xl text-center ">Create Project</DialogTitle>

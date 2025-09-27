@@ -20,6 +20,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
     const location = useLocation();
     const nav = useNavigate();
     const [pathname, setPathname] = useState(location.pathname);
+    const projectName = pathname.split("/")[3];
     const isProjectPage = pathname.startsWith("/dashboard/projects/")
         && pathname.split("/").length > 3;
 
@@ -107,9 +108,15 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
             icon: <GroupIcon className="text-[#ff5722]" />,
         },
         {
-            label: "Settings",
-            path: "settings",
+            label: "Roles & Permissions",
+            path: "roles-permissions",
             icon: <SettingsIcon className="text-[#009688]" />,
+            permission: "update_roles_permissions"
+        },
+        {
+            label: "Pipelines",
+            path: "pipelines",
+            icon: <AccountTreeIcon className="text-[#9427a9]" />,
         },
     ];
 
@@ -156,7 +163,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
                                 <Link
                                     key={path}
                                     onClick={toggleSideBar}
-                                    to={path}
+                                    to={`/dashboard/projects/${projectName}/${path}`} 
                                     className={`mt-2 text-white flex cursor-pointer hover:text-white rounded-2xl px-2 py-3 items-center ${pathname === path ? "text-white bg-[#8758ff]" : ""
                                         }`}
                                 >

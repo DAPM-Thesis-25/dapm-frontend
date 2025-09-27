@@ -32,39 +32,12 @@ export default function Users() {
 
     return (
         <div className="w-full h-screen overflow-y-auto pb-10">
-            {/* <Header title="Users" button={<AddMemberButton/>} /> */}
-            {/* lg:mt-[5%] sm:mt-[10%] mt-[12%] */}
             <div className="w-full bg-white md:p-7 p-5 shadow-md  flex justify-between">
                 <h1 className="text-2xl font-semibold">Users</h1>
                 {
                     authUser.userData?.orgRole == "ADMIN" && <div className=""><AddMemberButton /></div>
                 }
             </div>
-            {/* <div className="flex flex-wrap sm:flex-row flex-col items-center justify-between px-3 mt-5">
-                {authUser.userData?.orgRole == "ADMIN" && userData.users && userData.users.map((user) => (
-                    <div key={user.username} className="lg:w-[24%] md:w-[32.3%] sm:w-[49%] w-[80%] bg-white 2xl:p-5 p-3 h-40 mb-3 flex items-center ">
-                        <img className="2xl:w-24 2xl:h-24 md:w-16 md:h-16  rounded-full" src={randomeProfile()}></img>
-                        <div className="2xl:text- xl:text-lg 2xl:ml-2">
-                            <p className="font-medium">{user.username[0].toUpperCase()}{user.username.slice(1)}</p>
-                            <p className="font-medium text-gray-500 2xl:text-lg text-sm">{user.email}</p>
-                            <p className="font-medium text-[#ff5722] ">{user.orgRoleName}</p>
-                        </div>
-                    </div>
-                ))
-                }
-                {authUser.userData?.orgRole == "MEMBER" &&userData.admins && userData.admins.map((user) => (
-                    <div key={user.username} className="lg:w-[24%] md:w-[32.3%] sm:w-[49%] w-[80%] bg-white 2xl:p-5 p-3 h-40 mb-3 flex items-center ">
-                        <img className="2xl:w-24 2xl:h-24 md:w-16 md:h-16  rounded-full" src={randomeProfile()}></img>
-                        <div className="2xl:text- xl:text-lg 2xl:ml-2">
-                            <p className="font-medium">{user.username[0].toUpperCase()}{user.username.slice(1)}</p>
-                            <p className="font-medium text-gray-500 2xl:text-lg text-sm">{user.email}</p>
-                            <p className="font-medium text-[#ff5722] ">{user.orgRoleName}</p>
-                        </div>
-                    </div>
-                ))
-
-                }
-            </div> */}
             <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  xl:grid-cols-4 2xl:gap-6 gap-4  px-3 mt-5">
                 {authUser.userData?.orgRole == "ADMIN" && userData.users && userData.users.map((user) => (
                     <div key={user.username} className="bg-white 2xl:p-5 p-3 h-40 flex items-center shadow-md rounded-md">

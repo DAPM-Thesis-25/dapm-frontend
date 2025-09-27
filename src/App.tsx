@@ -9,6 +9,7 @@ import OrgProvider from "./context/orgsProvider";
 import PeProvider from "./context/processingElementsProvider";
 import AccessRequestProvider from "./context/accessRequestsProvider";
 import ProjectProvider from "./context/projectProvider";
+import PipelineProvider from "./context/pipelineProvider";
 // import { getRuntimeConfig } from "./runtimeConfig";
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
             <PeProvider>
               <AccessRequestProvider>
                 <ProjectProvider>
+                  <PipelineProvider>
                   <Routes>
                     <Route path="/" element={<Navigate to="/login" />} />
                     <Route path="/login" element={<Login />} />
@@ -29,6 +31,7 @@ export default function App() {
                       <Route path="/dashboard/*" element={<Dashboard />} />
                     </Route>
                   </Routes>
+                  </PipelineProvider>
                 </ProjectProvider>
               </AccessRequestProvider>
             </PeProvider>
