@@ -3,7 +3,8 @@ import React, { useContext, createContext, useMemo, useState, ReactNode } from "
 // import { getProjectPipelines } from "../api/pipeline"; // <-- example
 import { Node, Edge } from "@xyflow/react";
 import { dbPipelineToGraph } from "../utils/dbPipelineToGraph";
-import { getPipelines, getValidatedPipeline } from "../api/pipeline";
+import { designPipeline, getPipelines, getValidatedPipeline } from "../api/pipeline";
+import { graphToDesignPipeline } from "../utils/graphToDesignPipeline";
 
 // Basic types
 export type PipelineStatus = "draft" | "validated" | "built" | "executing" | "configured" | "terminated";
@@ -35,6 +36,7 @@ interface PipelineContextType {
   createDraft: (projectName: string, name?: string) => Pipeline;
   saveDraft: (pipeline: Pipeline) => void;
   deleteDraft: (projectName: string, id: string) => void;
+  validatePipeline: (orgDomainName: string, pipeline: Pipeline) => Promise<any>; 
 
   // (Later) validate via backend
   // validatePipeline: (projectName: string, id: string) => Promise<void>;
@@ -177,6 +179,28 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
     setPipelines((prev) => prev.filter((p) => !(p.source === "local" && p.id === id)));
   };
 
+  const validatePipeline = async (orgDomainName: string, pipeline: Pipeline) => {
+  if (!pipeline.graph) throw new Error("Pipeline has no graph to validate");
+
+  const dto = graphToDesignPipeline(
+    pipeline.graph.nodes,
+    pipeline.graph.edges,
+    pipeline.name,
+    pipeline.projectName
+  );
+  console.log("🚀 Validating pipeline with DTO:", dto);
+  setPipelines((prev) =>
+    prev.map((p) =>
+      p.id === pipeline.id
+        ? { ...p, status: "validated", updatedAt: new Date().toISOString() }
+        : p
+    )
+  );
+
+  const response = await designPipeline(orgDomainName, dto);
+  return response.data;
+};
+
   const value = useMemo<PipelineContextType>(() => ({
     pipelines,
     loading,
@@ -184,6 +208,7 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
     createDraft,
     saveDraft,
     deleteDraft,
+    validatePipeline,
     // validatePipeline: async (projectName: string, id: string) => { ... }
   }), [pipelines, loading]);
 

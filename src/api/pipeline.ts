@@ -12,14 +12,14 @@ export interface DesignChannel {
 }
 
 export interface Subscriber {
-    processingElement: DesignProcessingElement;
+    ["processing element"]: DesignProcessingElement;
     portNumber: number;
 }
 
 export interface DesignPipeline {
     pipelineName: string;
     projectName: string;
-    processingElements: DesignProcessingElement[];
+    ["processing elements"]: DesignProcessingElement[];
     channels: DesignChannel[];
 }
 

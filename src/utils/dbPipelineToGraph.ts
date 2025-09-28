@@ -45,7 +45,7 @@ export function dbPipelineToGraph(
       data: {
         label: pe.templateID,
         type: nodeType,
-        config: pe.configuration || {},
+        config: pe.configuration?.configuration ?? pe.configuration ?? {},
       },
     });
   });

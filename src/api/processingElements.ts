@@ -9,6 +9,7 @@ export interface ProcessingElement {
   hostURL: string;
   tier:  "FREE" | "BASIC" | "PREMIUM" | "PRIVATE";
   processingElementType: "SOURCE" | "SINK" | "OPERATOR";
+  configSchema: string;
 }
 
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -21,6 +21,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { usePipeline, Pipeline } from "../../context/pipelineProvider";
 import { usePE } from "../../context/processingElementsProvider";
 import { useAuth } from "../../auth/authProvider";
+import { graphToDesignPipeline } from "../../utils/graphToDesignPipeline";
 
 // -------- Custom Node with conditional ports --------
 function ProcessingNode({ data }: { data: any }) {
@@ -59,22 +60,31 @@ function ProcessingNode({ data }: { data: any }) {
   );
 }
 
-// -------- Canvas with React Flow logic --------
+// -------- Canvas with React Flow logic (controlled from parent) --------
 function PipelineCanvas({
   draft,
+  nodes,
+  setNodes,
+  edges,
+  setEdges,
   onSelectNode,
+  status,
+  editable,
 }: {
   draft: Pipeline;
+  nodes: Node[];
+  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+  edges: Edge[];
+  setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
   onSelectNode: (node: Node | null) => void;
+  status: string;
+  editable: boolean;
 }) {
-  const [nodes, setNodes] = useState<Node[]>(draft.graph?.nodes || []);
-  const [edges, setEdges] = useState<Edge[]>(draft.graph?.edges || []);
-
   const { screenToFlowPosition } = useReactFlow();
   const { saveDraft } = usePipeline();
   const pe = usePE();
 
-  // persist changes into localStorage via context
+  // persist graph changes into local storage via context
   useEffect(() => {
     if (draft.source === "local") {
       saveDraft({
@@ -83,35 +93,44 @@ function PipelineCanvas({
         graph: { nodes, edges },
       });
     }
-  }, [nodes, edges]);
+  }, [nodes, edges]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onNodesChange = useCallback(
-    (changes: NodeChange[]) =>
-      setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
-  );
+  (changes: NodeChange[]) =>
+    editable ? setNodes((nds) => applyNodeChanges(changes, nds)) : undefined,
+  [setNodes, editable]
+);
 
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) =>
-      setEdges((eds) => applyEdgeChanges(changes, eds)),
-    []
-  );
+const onEdgesChange = useCallback(
+  (changes: EdgeChange[]) =>
+    editable ? setEdges((eds) => applyEdgeChanges(changes, eds)) : undefined,
+  [setEdges, editable]
+);
+  const displayedEdges = useMemo(
+  () =>
+    edges.map((e) => ({
+      ...e,
+      animated: status === "executing",
+    })),
+  [edges, status]
+);
+
+
 
   const onConnect = useCallback(
-    (connection: Connection | Edge) =>
-      setEdges((eds) =>
-        addEdge({ ...connection, type: "straight" }, eds)
-      ),
-    []
-  );
+  (connection: Connection | Edge) =>
+    editable
+      ? setEdges((eds) => addEdge({ ...connection, type: "straight" }, eds))
+      : undefined,
+  [setEdges, editable]
+);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
+      if (!editable) return;
       event.preventDefault();
 
-      const templateId = event.dataTransfer.getData(
-        "application/reactflow"
-      );
+      const templateId = event.dataTransfer.getData("application/reactflow");
       if (!templateId) return;
 
       const peData = pe.processingElements?.find(
@@ -119,10 +138,15 @@ function PipelineCanvas({
       );
       if (!peData) return;
 
-      const position = screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
+      const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+
+      // parse schema if present
+      let schema: any = null;
+      try {
+        schema = peData.configSchema ? JSON.parse(peData.configSchema) : null;
+      } catch {
+        schema = null;
+      }
 
       const newNode: Node = {
         id: `${+new Date()}`,
@@ -131,13 +155,14 @@ function PipelineCanvas({
         data: {
           label: templateId,
           type: peData.processingElementType,
-          config: {}, // 👈 store config here
+          config: {},        // current config values
+          schema,            // parsed JSON schema (or null)
         },
       };
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [screenToFlowPosition, pe.processingElements]
+    [screenToFlowPosition, pe.processingElements, setNodes]
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -145,15 +170,12 @@ function PipelineCanvas({
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  // 👇 handle click to select node
-  const onNodeClick = (_: any, node: Node) => {
-    onSelectNode(node);
-  };
+  const onNodeClick = (_: any, node: Node) => onSelectNode(node);
 
   return (
     <ReactFlow
       nodes={nodes}
-      edges={edges}
+      edges={displayedEdges} 
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
@@ -180,27 +202,93 @@ export default function PipelineDesign() {
   const pe = usePE();
   const { pipelines, refreshPipelines, loading } = usePipeline();
 
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  // control graph state here so the right sidebar can update nodes
+  const draft = useMemo(() => pipelines.find((p) => p.name === name), [pipelines, name]);
+  const [nodes, setNodes] = useState<Node[]>(draft?.graph?.nodes || []);
+  const [edges, setEdges] = useState<Edge[]>(draft?.graph?.edges || []);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const { validatePipeline } = usePipeline();
+
+  // when draft changes (e.g., after refreshPipelines), seed local graph state
+  // Only run when switching to a new draft
+  useEffect(() => {
+    if (draft?.graph) {
+      setNodes(draft.graph.nodes || []);
+      setEdges(draft.graph.edges || []);
+    }
+  }, [draft?.name]); // or draft?.id if available
+
+  // dependencies are fine here
 
   useEffect(() => {
     pe.getPes();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (projectName) {
       refreshPipelines(projectName);
     }
-  }, [projectName]);
+  }, [projectName]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const draft = pipelines.find((p) => p.name === name);
+  const selectedNode = useMemo(
+    () => nodes.find((n) => n.id === selectedNodeId) || null,
+    [nodes, selectedNodeId]
+  );
 
-  if (loading) {
-    return <div className="p-6">Loading pipeline…</div>;
-  }
+  const handleSelectNode = (node: Node | null) => {
+    // if the node has no schema (e.g., came from validated DB), try to attach one from PE catalog
+    if (node) {
+      const label = node.data?.label as string | undefined;
+      const alreadyHasSchema = !!node.data?.schema;
 
-  if (!draft) {
-    return <div className="p-6">Pipeline not found</div>;
-  }
+      if (!alreadyHasSchema && label) {
+        const match = pe.processingElements?.find((e) => e.templateId === label);
+        if (match?.configSchema) {
+          try {
+            const parsed = JSON.parse(match.configSchema);
+            setNodes((nds) =>
+              nds.map((n) =>
+                n.id === node.id
+                  ? { ...n, data: { ...n.data, schema: parsed } }
+                  : n
+              )
+            );
+          } catch {
+            // ignore parse errors; leave schema as undefined
+          }
+        }
+      }
+      setSelectedNodeId(node.id);
+    } else {
+      setSelectedNodeId(null);
+    }
+  };
+
+  // helper to update config of selected node (immutably)
+  const updateSelectedNodeConfig = (key: string, value: any) => {
+    if (!selectedNode) return;
+    const nodeId = selectedNode.id;
+
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id !== nodeId) return n;
+        const prevConfig =
+          typeof n.data?.config === "object" && n.data.config !== null
+            ? (n.data.config as Record<string, any>)
+            : {};
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            config: { ...prevConfig, [key]: value },
+          },
+        };
+      })
+    );
+  };
+
+  if (loading) return <div className="p-6">Loading pipeline…</div>;
+  if (!draft) return <div className="p-6">Pipeline not found</div>;
 
   return (
     <div className="flex h-screen">
@@ -208,94 +296,150 @@ export default function PipelineDesign() {
       <aside className="w-60 bg-[#15283c] p-4 border-r overflow-y-auto">
         <h2 className="text-lg font-semibold mb-4 text-white">Processing Elements</h2>
         {pe.processingElements
-          ?.filter(
-            (elem) =>
-              elem.ownerOrganization === auth.userData?.organizationName
-          )
+          ?.filter((elem) => elem.ownerOrganization === auth.userData?.organizationName)
           .map((elem) => (
             <div
               key={elem.templateId}
               className="p-2 bg-white rounded shadow mb-2 cursor-pointer hover:bg-gray-50"
               draggable
               onDragStart={(event) =>
-                event.dataTransfer.setData(
-                  "application/reactflow",
-                  elem.templateId
-                )
+                event.dataTransfer.setData("application/reactflow", elem.templateId)
               }
             >
               {elem.templateId}{" "}
-              <span className="text-xs text-gray-500">
-                ({elem.processingElementType})
-              </span>
+              <span className="text-xs text-gray-500">({elem.processingElementType})</span>
             </div>
           ))}
 
         <h2 className="text-lg font-semibold mb-4 mt-6 text-white">External PEs</h2>
         {pe.processingElements
-          ?.filter(
-            (elem) =>
-              elem.ownerOrganization !== auth.userData?.organizationName
-          )
+          ?.filter((elem) => elem.ownerOrganization !== auth.userData?.organizationName)
           .map((elem) => (
             <div
               key={elem.templateId}
               className="p-2 bg-white rounded shadow mb-2 cursor-pointer hover:bg-gray-50"
               draggable
               onDragStart={(event) =>
-                event.dataTransfer.setData(
-                  "application/reactflow",
-                  elem.templateId
-                )
+                event.dataTransfer.setData("application/reactflow", elem.templateId)
               }
             >
               {elem.templateId}{" "}
-              <span className="text-xs text-gray-500">
-                ({elem.processingElementType})
-              </span>
+              <span className="text-xs text-gray-500">({elem.processingElementType})</span>
             </div>
           ))}
       </aside>
 
-      {/* Canvas */}
+      {/* Main Canvas Area */}
       <div className="flex-1">
         <ReactFlowProvider>
-          <PipelineCanvas draft={draft} onSelectNode={setSelectedNode} />
+          <PipelineCanvas
+            draft={draft}
+            nodes={nodes}
+            setNodes={setNodes}
+            edges={edges}
+            setEdges={setEdges}
+            onSelectNode={handleSelectNode}
+            status={draft.status}
+            editable={draft.status === "draft"}
+          />
         </ReactFlowProvider>
       </div>
 
-      {/* Right Sidebar for config */}
-      {selectedNode && (
-        <aside className="w-60 bg-[#15283c] p-4 border-l overflow-y-auto text-white">
-          <h2 className="text-lg font-semibold mb-4">Configuration</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Configure node {String(selectedNode.data.label)} <br />
-             {/* <strong>{selectedNode.data.label}
+      {/* Right Sidebar for Node Configuration */}
+      <aside className="w-72 bg-[#15283c] p-4 border-l overflow-y-auto text-white">
+        {/* <button
+          className="bg-green-600 text-white px-4 py-2 rounded"
+          onClick={async () => {
+            if (!draft) return;
+            try {
+              const orgDomainName = localStorage.getItem("domain") || "";
+              const result = await validatePipeline(orgDomainName, draft);
+              console.log("✅ Validation result:", result);
+              // optional: update pipeline status or show a toast
+            } catch (err) {
+              console.error("❌ Validation failed:", err);
+            }
+          }}
+        >
+          Validate
+        </button> */}
 
-                
-             </strong> */}
-          </p>
+        <h2 className="text-lg font-semibold mb-4">Configuration</h2>
 
-          {/* Example config fields */}
-          {/* <label className="block text-sm font-medium">Parameter A</label> */}
-          {/* <input
-            type="text"
-            className="w-full p-2 border rounded mb-4"
-            defaultValue={selectedNode.data.config?.paramA || ""}
-          />
+        {!selectedNode && (
+          <p className="text-sm text-gray-300">Select a node to configure.</p>
+        )}
 
-          <label className="block text-sm font-medium">Parameter B</label>
-          <input
-            type="number"
-            className="w-full p-2 border rounded mb-4"
-            defaultValue={selectedNode.data.config?.paramB || ""}
-          />
+        {selectedNode && (
+          <>
+            <p className="text-sm text-gray-300 mb-3">
+              Node: <strong>{String(selectedNode.data?.label)}</strong>
+            </p>
 
-          <button className="bg-blue-600 text-white px-4 py-2 rounded">
-            Save Config
-          </button> */}
-        </aside>
-      )}
+            {/* If schema has no properties or is null, show friendly message */}
+            {(() => {
+              const schema: any = selectedNode.data?.schema || null;
+              const properties: Record<string, any> =
+                (schema?.properties as Record<string, any>) || {};
+              const keys = Object.keys(properties);
+
+              if (!schema || keys.length === 0) {
+                return (
+                  <div className="text-sm text-gray-300">
+                    This processing element does not require configuration.
+                  </div>
+                );
+              }
+
+              return (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  {keys.map((key) => {
+                    const def = properties[key] || {};
+                    const isNumber = def.type === "number";
+
+                    const val =
+                      (selectedNode.data?.config as Record<string, any>)?.[key] ?? "";
+
+                    return (
+                      <div key={key} className="mb-4">
+                        <label className="block text-sm font-medium mb-1">
+                          {key}
+                          {Array.isArray(schema.required) &&
+                            schema.required.includes(key) && (
+                              <span className="ml-1 text-red-300">*</span>
+                            )}
+                        </label>
+                        <input
+                          type={isNumber ? "number" : "text"}
+                          minLength={def.minLength}
+                          maxLength={def.maxLength}
+                          className="w-full p-2 rounded text-black"
+                          value={val}
+                          onChange={(e) => {
+                            const newValue = isNumber
+                              ? Number(e.target.value)
+                              : e.target.value;
+                            updateSelectedNodeConfig(key, newValue);
+                          }}
+                        />
+                        {def.description && (
+                          <p className="text-xs text-gray-300 mt-1">
+                            {def.description}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </form>
+              );
+            })()}
+          </>
+        )}
+      </aside>
     </div>
   );
 }
