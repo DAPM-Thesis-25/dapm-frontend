@@ -39,10 +39,12 @@ export default function AssignUserPopup({ openAssignUserPopup, setOpenAssignUser
 
     useEffect(() => {
         setPathname(location.pathname);
+        console.log(location.pathname);
     }, [location.pathname]);
 
     useEffect(() => {
         if (projectName) {
+            console.log("Project Name:", projectName);
             proj.getProjectByName(projectName);
             proj.getProjectMemberss(projectName);
 

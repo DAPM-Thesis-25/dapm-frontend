@@ -46,12 +46,12 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
     }
 
     const navItems = [
-        {
-            label: "Overview",
-            path: "/dashboard/overview",
-            icon: <EqualizerIcon className="text-[#ff9800]" />,
-            role: role.ADMIN,
-        },
+        // {
+        //     label: "Overview",
+        //     path: "/dashboard/overview",
+        //     icon: <EqualizerIcon className="text-[#ff9800]" />,
+        //     role: role.ADMIN,
+        // },
         {
             label: "Users",
             path: "/dashboard/users",
@@ -98,33 +98,34 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
 
     const projectNavItems = [
         {
-            label: "Overview",
-            path: "overview",
-            icon: <EqualizerIcon className="text-[#ff9800]" />,
+            label: "Pipelines",
+            path: "pipelines",
+            icon: <AccountTreeIcon className="text-[#9427a9]" />,
         },
-        {
-            label: "Members",
-            path: "members",
-            icon: <GroupIcon className="text-[#ff5722]" />,
-        },
+        
         {
             label: "Roles & Permissions",
             path: "roles-permissions",
             icon: <SettingsIcon className="text-[#009688]" />,
             permission: "update_roles_permissions"
         },
+        
+        
         {
-            label: "Pipelines",
-            path: "pipelines",
-            icon: <AccountTreeIcon className="text-[#9427a9]" />,
+            label: "Members",
+            path: "members",
+            icon: <GroupIcon className="text-[#ff5722]" />,
+        },
+        {
+            label: "Access Requests",
+            path: "access-requests",
+            icon: <EqualizerIcon className="text-[#ff9800]" />,
         },
     ];
 
     console.log(auth.userData?.orgRole);
 
     return (
-        // bg-[url(./imgs/login-bg.jpg)]
-
         <div className={`xl:w-[20%] lg:w-[20%] md:w-[17%]  w-full   md:static transition-transform transform absolute z-10   bg-[#15283c] sidebar h-screen overflow-y-auto pb-10  ${isOpen ? 'translate-x-0 ' : '-translate-x-full '} `}>
             <div className="text-center text-white sm:text-2xl font-bold sidebar-title text-5xl h-[14%] bg-[#214162] flex items-center px-6 md:static  w-full">
                 <img src={profile} className="h-16 w-16 rounded-full lg:flex md:hidden flex" alt="logo" />

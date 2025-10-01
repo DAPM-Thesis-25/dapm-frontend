@@ -90,7 +90,7 @@ export default function CreateProjForm({ setOpenCreateProjectPopup }: CreateProj
 
                 </div>
 
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                     <div className="  sm:w-[48%] w-full flex flex-col h-fit items-start content-start mb-2">
                         <h4 className="text-sm font-bold text-[#ffffff4d] ">Select Roles</h4>
                         <div className="signup-input h-fit relative border-2 p-1 border-white  w-full  flex items-center sm:rounded-none rounded-md">
@@ -148,10 +148,10 @@ export default function CreateProjForm({ setOpenCreateProjectPopup }: CreateProj
                     </div>
 
 
-                </div>
+                </div> */}
 
                 <div className="w-full flex flex-wrap gap-2 mt-2">
-                    <h4 className="w-full text-sm font-bold text-[#ffffff4d] ">Selected Roles</h4>
+                    <h4 className="w-full text-sm font-bold text-[#ffffff4d] ">Roles</h4>
                     {
                         selectedRoles.length > 0 && selectedRoles.map((role) => (
                             <div className="text-xs text-white mt-1 border-2 p-3 rounded-md" key={role.id}>

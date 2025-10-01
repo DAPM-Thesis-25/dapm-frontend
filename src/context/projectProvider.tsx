@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { assignUserRole, createProject, createRole, getAllProjects, getMyProjects, getProject, getProjectMembers, getProjectRolePermActions, getProjectRolePermActionsByRole, getProjectsRoles, Project, ProjectMember, ProjectPermAction, Role } from "../api/project";
+import { assignCustomRole, assignUserRole, createProject, createRole, CustomizedRole, getAllProjects, getMyProjects, getPermissions, getProject, getProjectMembers, getProjectRolePermActions, getProjectRolePermActionsByRole, getProjectsRoles, Project, ProjectMember, ProjectPermAction, Role } from "../api/project";
 
 
 
@@ -32,6 +32,9 @@ interface ProjectContextType {
   assignUserRoleProj: (data: ProjectMember) => Promise<{ success: boolean; message: any; error?: string }>;
   getProjectByName: (name: string) => Promise<string | void>;
   currentProject: Project | null;
+  permissions: string[] | null;
+  getPerm: () => Promise<string | void>;
+  assignCustomizedRole: (data: CustomizedRole) => Promise<{ success: boolean; message: any; error?: string }>;
 }
 
 
@@ -52,6 +55,7 @@ const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
   const [projectRolePermActions, setProjectRolePermActions] = useState<ProjectPermAction[] | null>(null);
   const [loadingCreateProject, setLoadingCreateProject] = useState(false);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [permissions, setPermissions] = useState<string[] | null>(null);
   const navigate = useNavigate();
 
   // get all Projects
@@ -123,7 +127,7 @@ const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
   // create Role
   async function createRoles(roleName: string): Promise<{ success: boolean; message: any; error?: string }> {
     try {
-      console.log("RoleName in createRoles:", roleName);
+      // console.log("RoleName in createRoles:", roleName);
       const safeOrgDomainName = localStorage.getItem("domain") || "";
       const response = await createRole(safeOrgDomainName, roleName);
       // update roles state
@@ -148,7 +152,7 @@ const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
   // register Project
   async function registerProject(projectData: createProject): Promise<{ success: boolean; message: any; error?: string }> {
     try {
-      console.log("ProjectData in registerProject:", projectData);
+      // console.log("ProjectData in registerProject:", projectData);
       const safeOrgDomainName = localStorage.getItem("domain") || "";
       const response = await createProject(safeOrgDomainName, projectData);
       return {
@@ -175,6 +179,7 @@ const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
       const response = await getProjectRolePermActions(safeOrgDomainName, projectName);
 
       if (response.data) {
+        console.log("Project Role Perm Actions:", response.data);
         setProjectRolesPermActions(response.data);
       }
     } catch (err) {
@@ -189,6 +194,28 @@ const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
     }
   }
 
+  async function getPerm() {
+    try {
+
+      const safeOrgDomainName = localStorage.getItem("domain") || "";
+      const response = await getPermissions(safeOrgDomainName);
+
+      if (response.data) {
+        console.log("Project Role Perm Actions:", response.data);
+        setPermissions(response.data);
+      }
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        return (
+          (err.response?.data as string) ||
+          err.message ||
+          "get Permissions failed"
+        );
+      }
+      return "Get Permissions failed";
+    }
+  }
+
 
   async function getProjectRolePermActionsByRolee(projectName: string, roleName: string) {
     try {
@@ -197,7 +224,7 @@ const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
       const response = await getProjectRolePermActionsByRole(safeOrgDomainName, projectName, roleName);
 
       if (response.data) {
-        console.log("Project Role Perm Actions:", response.data);
+        // console.log("Project Role Perm Actions:", response.data);
         setProjectRolePermActions(response.data);
       }
     } catch (err) {
@@ -254,15 +281,38 @@ const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
     }
   };
 
+   const assignCustomizedRole = async (data: CustomizedRole) => {
+    try {
+      const safeOrgDomainName = localStorage.getItem("domain") || "";
+      const response = await assignCustomRole(safeOrgDomainName, data);
+      console.log("Response from assignCustomizedRole:", response);
+      return {
+        success: true,
+        message: response.data || "Customized role assigned successfully."
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return {
+          success: false,
+          message: error.response?.data?.message || error.message || "Customized role assignment failed",
+          error: error.response?.data?.error
+        };
+      }
+      return { success: false, message: "Customized role assignment failed due to unknown error" };
+    }
+  };
+
   // get Project by name
   const getProjectByName = async (name: string) => {
     try {
+      // console.log("Getting project by name:", name);
       const safeOrgDomainName = localStorage.getItem("domain") || "";
       const response = await getProject(safeOrgDomainName, name);
 
       // console.log("Response from getProjectByName:", response);
       if (response.data) {
         // unwrap if it's an array
+        // console.log("Response from getProjectByName:", response);
         const project = Array.isArray(response.data) ? response.data[0] : response.data;
         setCurrentProject(project);
       }
@@ -298,7 +348,10 @@ const ProjectProvider: React.FC<ProjectProviderProps> = ({ children }) => {
         projectRolesPermActions,
         assignUserRoleProj,
         getProjectByName,
-        currentProject
+        currentProject,
+        permissions,
+        getPerm,
+        assignCustomizedRole
       }}
     >
       {children}

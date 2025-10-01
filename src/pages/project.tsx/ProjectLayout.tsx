@@ -6,6 +6,7 @@ import { useProject } from "../../context/projectProvider";
 import PipelineBuilder from "./pipeline";
 import Pipelines from "./pipeline";
 import PipelineDesign from "../../components/pipeline/pipelineDesign";
+import RolesAndPermissions from "./rolesAndPermissions";
 
 export default function ProjectLayout() {
     const location = useLocation();
@@ -41,6 +42,7 @@ export default function ProjectLayout() {
             <Routes>
                 <Route path="/" element={<Navigate to="members" />} />
                 <Route path="members" element={<Members />} />
+                <Route path="roles-permissions" element={<RolesAndPermissions />} />
                 <Route path="pipelines" element={<Pipelines />} />
                 <Route path="pipelines/:name" element={<PipelineDesign />} />
             </Routes>
