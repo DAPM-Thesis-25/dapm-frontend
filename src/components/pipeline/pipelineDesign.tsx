@@ -17,7 +17,7 @@ import {
   Position,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { usePipeline, Pipeline } from "../../context/pipelineProvider";
 import { usePE } from "../../context/processingElementsProvider";
 import { useAuth } from "../../auth/authProvider";
@@ -96,34 +96,34 @@ function PipelineCanvas({
   }, [nodes, edges]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onNodesChange = useCallback(
-  (changes: NodeChange[]) =>
-    editable ? setNodes((nds) => applyNodeChanges(changes, nds)) : undefined,
-  [setNodes, editable]
-);
+    (changes: NodeChange[]) =>
+      editable ? setNodes((nds) => applyNodeChanges(changes, nds)) : undefined,
+    [setNodes, editable]
+  );
 
-const onEdgesChange = useCallback(
-  (changes: EdgeChange[]) =>
-    editable ? setEdges((eds) => applyEdgeChanges(changes, eds)) : undefined,
-  [setEdges, editable]
-);
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) =>
+      editable ? setEdges((eds) => applyEdgeChanges(changes, eds)) : undefined,
+    [setEdges, editable]
+  );
   const displayedEdges = useMemo(
-  () =>
-    edges.map((e) => ({
-      ...e,
-      animated: status === "executing",
-    })),
-  [edges, status]
-);
+    () =>
+      edges.map((e) => ({
+        ...e,
+        animated: status === "executing",
+      })),
+    [edges, status]
+  );
 
 
 
   const onConnect = useCallback(
-  (connection: Connection | Edge) =>
-    editable
-      ? setEdges((eds) => addEdge({ ...connection, type: "straight" }, eds))
-      : undefined,
-  [setEdges, editable]
-);
+    (connection: Connection | Edge) =>
+      editable
+        ? setEdges((eds) => addEdge({ ...connection, type: "straight" }, eds))
+        : undefined,
+    [setEdges, editable]
+  );
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
@@ -175,7 +175,7 @@ const onEdgesChange = useCallback(
   return (
     <ReactFlow
       nodes={nodes}
-      edges={displayedEdges} 
+      edges={displayedEdges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
@@ -195,6 +195,7 @@ const onEdgesChange = useCallback(
 
 // -------- Main Builder with Sidebar + Canvas --------
 export default function PipelineDesign() {
+  const navigate = useNavigate();
   const { name } = useParams<{ name: string }>();
   const location = useLocation();
   const projectName = location.pathname.split("/")[3] || "default";
@@ -347,27 +348,30 @@ export default function PipelineDesign() {
 
       {/* Right Sidebar for Node Configuration */}
       <aside className="w-72 bg-[#15283c] p-4 border-l overflow-y-auto text-white">
-        {/* <button
-          className="bg-green-600 text-white px-4 py-2 rounded"
-          onClick={async () => {
-            if (!draft) return;
-            try {
-              const orgDomainName = localStorage.getItem("domain") || "";
-              const result = await validatePipeline(orgDomainName, draft);
-              console.log("✅ Validation result:", result);
-              // optional: update pipeline status or show a toast
-            } catch (err) {
-              console.error("❌ Validation failed:", err);
-            }
-          }}
-        >
-          Validate
-        </button> */}
+        
+
+        {draft.status === "executing" && (
+          <>
+          <h2 className="text-lg font-semibold mb-4">Results</h2>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded w-full  mb-4"
+            onClick={() => navigate(`view-result`)}
+          >
+            View Results
+          </button>
+          </>
+        )} 
 
         <h2 className="text-lg font-semibold mb-4">Configuration</h2>
 
         {!selectedNode && (
-          <p className="text-sm text-gray-300">Select a node to configure.</p>
+          draft.status === "draft" ? (
+            <p className="text-sm text-gray-300">Select a node to configure.</p>
+          ) : (
+            <p className="text-sm text-gray-300">
+              Select a processing element to view configuration.
+            </p>
+          )
         )}
 
         {selectedNode && (
@@ -414,6 +418,7 @@ export default function PipelineDesign() {
                             )}
                         </label>
                         <input
+                          disabled={draft.status !== "draft"}
                           type={isNumber ? "number" : "text"}
                           minLength={def.minLength}
                           maxLength={def.maxLength}

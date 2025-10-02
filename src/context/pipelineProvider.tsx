@@ -3,8 +3,9 @@ import React, { useContext, createContext, useMemo, useState, ReactNode } from "
 // import { getProjectPipelines } from "../api/pipeline"; // <-- example
 import { Node, Edge } from "@xyflow/react";
 import { dbPipelineToGraph } from "../utils/dbPipelineToGraph";
-import { designPipeline, getPipelines, getValidatedPipeline } from "../api/pipeline";
+import { buildPipelineApi, checkConfigurationStatusPipeline, designPipeline, executePipelineApi, getPipelines, getValidatedPipeline, terminatePipelineApi } from "../api/pipeline";
 import { graphToDesignPipeline } from "../utils/graphToDesignPipeline";
+import axios from "axios";
 
 // Basic types
 export type PipelineStatus = "draft" | "validated" | "built" | "executing" | "configured" | "terminated";
@@ -30,14 +31,23 @@ export interface Pipeline {
 interface PipelineContextType {
   pipelines: Pipeline[];                                 // merged list (remote + local)
   loading: boolean;
+  actionLoading: {
+    validate?: boolean;
+    build?: boolean;
+    execute?: boolean;
+    terminate?: boolean;
+  };
   refreshPipelines: (projectName: string) => Promise<void>;
 
   // Local-only draft helpers
   createDraft: (projectName: string, name?: string) => Pipeline;
   saveDraft: (pipeline: Pipeline) => void;
   deleteDraft: (projectName: string, id: string) => void;
-  validatePipeline: (orgDomainName: string, pipeline: Pipeline) => Promise<any>; 
-
+  validatePipeline: (orgDomainName: string, pipeline: Pipeline) => Promise<any>;
+  buildPipeline: (orgDomainName: string, pipeline: Pipeline) => Promise<any>;
+  checkConfigStatus: (orgDomainName: string, pipelineName: string) => Promise<any>;
+  executePipeline: (orgDomainName: string, pipeline: Pipeline) => Promise<any>;
+  terminatePipeline: (orgDomainName: string, pipeline: Pipeline) => Promise<any>;
   // (Later) validate via backend
   // validatePipeline: (projectName: string, id: string) => Promise<void>;
 }
@@ -78,7 +88,7 @@ async function fetchRemotePipelines(projectName: string): Promise<Pipeline[]> {
   // console.log("Fetched remote pipelines:", list);
   const detailedPipelines: Pipeline[] = await Promise.all(
     list.map(async (p): Promise<Pipeline> => {
-      if (p.pipelinePhase === "VALIDATED" || p.pipelinePhase === "BUILT" || p.pipelinePhase === "EXECUTING" || p.pipelinePhase === "TERMINATED") {
+      if (p.pipelinePhase === "VALIDATED" || p.pipelinePhase === "BUILT" || p.pipelinePhase === "EXECUTING" || p.pipelinePhase === "TERMINATED" || p.pipelinePhase === "CONFIGURED") {
         const detailRes = await getValidatedPipeline(safeOrgDomainName, p.pipelineName);
         const detail = detailRes.data;
         const graph = dbPipelineToGraph(detail);
@@ -116,16 +126,27 @@ async function fetchRemotePipelines(projectName: string): Promise<Pipeline[]> {
 const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState({});
 
   // Merge local + remote (remote wins on id collisions)
   function mergePipelines(remote: Pipeline[], local: Pipeline[]) {
-    const byId = new Map<string, Pipeline>();
-    for (const p of local) byId.set(p.id, p);
-    for (const p of remote) byId.set(p.id, p); // remote overrides local if same id
-    return Array.from(byId.values()).sort(
+    const byName = new Map<string, Pipeline>();
+
+    // start with local
+    for (const p of local) {
+      byName.set(p.name, p);
+    }
+
+    // override with remote (remote wins if same name)
+    for (const p of remote) {
+      byName.set(p.name, p);
+    }
+
+    return Array.from(byName.values()).sort(
       (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
   }
+
 
   const refreshPipelines = async (projectName: string) => {
     setLoading(true);
@@ -159,18 +180,21 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
   };
 
   const saveDraft = (pipeline: Pipeline) => {
-    if (pipeline.source !== "local") return; // only local drafts are saved this way
+    if (pipeline.source !== "local") return;
+
     const curr = readLocal(pipeline.projectName);
-    const updated = [pipeline, ...curr.filter((p) => p.id !== pipeline.id)];
+    const updated = [pipeline, ...curr.filter((p) => p.name !== pipeline.name)];
     writeLocal(pipeline.projectName, updated);
+
     setPipelines((prev) => {
-      const withoutThis = prev.filter((p) => p.id !== pipeline.id);
+      const withoutThis = prev.filter((p) => p.name !== pipeline.name);
       return mergePipelines(
-        withoutThis.filter(p => p.source === "remote"),
-        [pipeline, ...withoutThis.filter(p => p.source === "local")]
+        withoutThis.filter((p) => p.source === "remote"),
+        [pipeline, ...withoutThis.filter((p) => p.source === "local")]
       );
     });
   };
+
 
   const deleteDraft = (projectName: string, id: string) => {
     const curr = readLocal(projectName);
@@ -180,26 +204,161 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
   };
 
   const validatePipeline = async (orgDomainName: string, pipeline: Pipeline) => {
-  if (!pipeline.graph) throw new Error("Pipeline has no graph to validate");
+    setActionLoading((prev) => ({ ...prev, validate: true }));
+    if (!pipeline.graph) throw new Error("Pipeline has no graph to validate");
 
-  const dto = graphToDesignPipeline(
-    pipeline.graph.nodes,
-    pipeline.graph.edges,
-    pipeline.name,
-    pipeline.projectName
-  );
-  console.log("🚀 Validating pipeline with DTO:", dto);
-  setPipelines((prev) =>
-    prev.map((p) =>
-      p.id === pipeline.id
-        ? { ...p, status: "validated", updatedAt: new Date().toISOString() }
-        : p
-    )
-  );
+    const dto = graphToDesignPipeline(
+      pipeline.graph.nodes,
+      pipeline.graph.edges,
+      pipeline.name,
+      pipeline.projectName
+    );
+    console.log("🚀 Validating pipeline with DTO:", dto);
 
-  const response = await designPipeline(orgDomainName, dto);
-  return response.data;
-};
+    try {
+      const response = await designPipeline(orgDomainName, dto);
+      console.log("✅ Pipeline validated successfully:", response.data);
+      setPipelines((prev) =>
+        prev.map((p) =>
+          p.id === pipeline.id
+            ? { ...p, status: "validated", updatedAt: new Date().toISOString() }
+            : p
+        )
+      );
+      setActionLoading((prev) => ({ ...prev, validate: false }));
+      return {
+        success: true,
+        message: response.data || "Pipeline validated successfully."
+      };
+    } catch (error) {
+      setActionLoading((prev) => ({ ...prev, validate: false }));
+      if (axios.isAxiosError(error)) {
+        return {
+          success: false,
+          message: error.response?.data?.message || error.message || "Pipeline validation failed",
+          error: error.response?.data?.error
+        };
+      }
+      return { success: false, message: "Pipeline validation failed due to unknown error" };
+    }
+
+    // const response = await designPipeline(orgDomainName, dto);
+
+    // return response.data;
+  };
+
+  const buildPipeline = async (orgDomainName: string, pipeline: Pipeline) => {
+    console.log("🚀 Building pipeline:", orgDomainName);
+    setActionLoading((prev) => ({ ...prev, build: true }));
+    try {
+      const response = await buildPipelineApi(orgDomainName, pipeline.name);
+      console.log("✅ Pipeline built successfully:", response.data);
+
+      setPipelines((prev) =>
+        prev.map((p) =>
+          p.id === pipeline.id
+            ? { ...p, status: "built", updatedAt: new Date().toISOString() }
+            : p
+        )
+      );
+
+      setActionLoading((prev) => ({ ...prev, build: false }));
+      return {
+        success: true,
+        message: response.data || "Pipeline built successfully."
+      };
+    } catch (error) {
+      setActionLoading((prev) => ({ ...prev, build: false }));
+      if (axios.isAxiosError(error)) {
+        return {
+          success: false,
+          message: error.response?.data?.message || error.message || "Pipeline build failed",
+          error: error.response?.data?.error,
+        };
+      }
+      return { success: false, message: "Pipeline build failed due to unknown error" };
+    }
+  };
+
+  const executePipeline = async (orgDomainName: string, pipeline: Pipeline) => {
+    console.log("Executing pipeline:", orgDomainName);
+    setActionLoading((prev) => ({ ...prev, execute: true }));
+    try {
+      const response = await executePipelineApi(orgDomainName, pipeline.name);
+      console.log("Pipeline executed successfully:", response.data);
+
+      setPipelines((prev) =>
+        prev.map((p) =>
+          p.id === pipeline.id
+            ? { ...p, status: "executing", updatedAt: new Date().toISOString() }
+            : p
+        )
+      );
+
+      setActionLoading((prev) => ({ ...prev, execute: false }));
+      return {
+        success: true,
+        message: response.data || "Pipeline executed successfully."
+      };
+    } catch (error) {
+      setActionLoading((prev) => ({ ...prev, execute: false }));
+      if (axios.isAxiosError(error)) {
+        return {
+          success: false,
+          message: error.response?.data?.message || error.message || "Pipeline execution failed",
+          error: error.response?.data?.error,
+        };
+      }
+      return { success: false, message: "Pipeline execution failed due to unknown error" };
+    }
+  };
+
+    const terminatePipeline = async (orgDomainName: string, pipeline: Pipeline) => {
+    console.log("Terminating pipeline:", orgDomainName);
+    setActionLoading((prev) => ({ ...prev, terminate: true }));
+    try {
+      const response = await terminatePipelineApi(orgDomainName, pipeline.name);
+      console.log("Pipeline terminated successfully:", response.data);
+
+      setPipelines((prev) =>
+        prev.map((p) =>
+          p.id === pipeline.id
+            ? { ...p, status: "terminated", updatedAt: new Date().toISOString() }
+            : p
+        )
+      );
+
+      setActionLoading((prev) => ({ ...prev, terminate: false }));
+      return {
+        success: true,
+        message: response.data || "Pipeline terminated successfully."
+      };
+    } catch (error) {
+      setActionLoading((prev) => ({ ...prev, terminate: false }));
+      if (axios.isAxiosError(error)) {
+        return {
+          success: false,
+          message: error.response?.data?.message || error.message || "Pipeline termination failed",
+          error: error.response?.data?.error,
+        };
+      }
+      return { success: false, message: "Pipeline termination failed due to unknown error" };
+    }
+  };
+
+  const checkConfigStatus = async (orgDomainName: string, pipelineName: string) => {
+    setLoading(true);
+    try {
+      const res = await checkConfigurationStatusPipeline(orgDomainName, pipelineName);
+      setLoading(false);
+      return res.data;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  };
+
+
 
   const value = useMemo<PipelineContextType>(() => ({
     pipelines,
@@ -209,8 +368,13 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
     saveDraft,
     deleteDraft,
     validatePipeline,
+    buildPipeline,
+    checkConfigStatus,
+    actionLoading,
+    executePipeline,
+    terminatePipeline,
     // validatePipeline: async (projectName: string, id: string) => { ... }
-  }), [pipelines, loading]);
+  }), [pipelines, loading, actionLoading]);
 
   return (
     <PipelineContext.Provider value={value}>

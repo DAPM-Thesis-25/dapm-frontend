@@ -19,7 +19,7 @@ export default function Popup({ openPopup, setOpenPopup, title, children, dialog
         <Dialog open={openPopup} onClose={() => setOpenPopup(false)} className="relative z-40 ">
             <div className="fixed inset-0 flex w-screen items-center justify-center sm:p-4 backdrop-blur-md 
             ">
-                <DialogPanel className={`relative lg:w-[40%] md:w-[60%] sm:h-fit sm:max-h-[70%]   h-full space-y-4 border  bg-[#15283c] sm:p-12 p-4 rounded sm:border-solid border-white border-none overflow-y-auto  sm:w-[600px] w-full  search-popup ${dialogClassName}`}>
+                <DialogPanel className={`relative lg:w-[40%] md:w-[60%] sm:h-fit sm:max-h-[70%] sm:min-h-[300px]   h-full space-y-4 border  bg-[#15283c] sm:p-12 p-4 rounded sm:border-solid border-white border-none overflow-y-auto  sm:w-[600px] w-full  search-popup ${dialogClassName}`}>
                     <CloseIcon onClick={() => setOpenPopup(false)} className="cursor-pointer absolute text-white right-5 top-5"></CloseIcon>
 
                     <DialogTitle className="font-bold text-white sm:text-3xl text-xl text-center ">{title}</DialogTitle>

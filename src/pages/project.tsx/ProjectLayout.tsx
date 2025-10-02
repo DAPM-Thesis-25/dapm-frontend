@@ -7,6 +7,7 @@ import PipelineBuilder from "./pipeline";
 import Pipelines from "./pipeline";
 import PipelineDesign from "../../components/pipeline/pipelineDesign";
 import RolesAndPermissions from "./rolesAndPermissions";
+import PipelineResults from "./pipelineResults";
 
 export default function ProjectLayout() {
     const location = useLocation();
@@ -45,6 +46,8 @@ export default function ProjectLayout() {
                 <Route path="roles-permissions" element={<RolesAndPermissions />} />
                 <Route path="pipelines" element={<Pipelines />} />
                 <Route path="pipelines/:name" element={<PipelineDesign />} />
+                <Route path="pipelines/:name/view-result" element={<PipelineResults />} />
+
             </Routes>
         </>
     )

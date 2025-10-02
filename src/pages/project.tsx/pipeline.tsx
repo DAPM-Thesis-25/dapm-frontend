@@ -71,13 +71,18 @@ export default function Pipelines() {
                                         </span>
                                     ) 
                                     : p.status === "built" ? (
-                                        <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 font-medium px-2 py-1 rounded">
-                                            <Clock size={14} /> Built
+                                        <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
+                                            <CheckCircle size={14} /> Built
+                                        </span>
+                                    )
+                                    : p.status === "configured" ? (
+                                        <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
+                                            <CheckCircle size={14} /> Configured
                                         </span>
                                     )
                                     : p.status === "executing" ? (
-                                        <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 font-medium px-2 py-1 rounded">
-                                            <Clock size={14} /> Executing
+                                        <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
+                                            <CheckCircle size={14} /> Executing
                                         </span>
                                     )
                                     : p.status === "terminated" ? (
