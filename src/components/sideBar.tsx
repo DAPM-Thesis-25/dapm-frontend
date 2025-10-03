@@ -28,7 +28,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
     useEffect(() => {
         setPathname(location.pathname);
         console.log(location.pathname);
-        console.log(auth.token)
+
     }, [location.pathname]);
 
 
@@ -53,6 +53,18 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
         //     role: role.ADMIN,
         // },
         {
+            label: "My Projects",
+            path: "/dashboard/projects",
+            icon: <AccountTreeIcon className="text-[#009688]" />,
+            role: role.USER,
+        },
+        {
+            label: "Projects",
+            path: "/dashboard/projects",
+            icon: <AccountTreeIcon className="text-[#009688]" />,
+            role: role.ADMIN,
+        },
+        {
             label: "Users",
             path: "/dashboard/users",
             icon: <GroupIcon className="text-[#ff5722]" />,
@@ -70,24 +82,14 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
             icon: <TerminalIcon className="text-[#2196f3]" />,
             role: role.ADMIN,
         },
-        {
-            label: "Projects",
-            path: "/dashboard/projects",
-            icon: <AccountTreeIcon className="text-[#009688]" />,
-            role: role.ADMIN,
-        },
+        
         {
             label: "Access Requests",
             path: "/dashboard/access-requests",
             icon: <AccountTreeIcon className="text-[#9427a9]" />,
             role: role.ADMIN,
         },
-        {
-            label: "My Projects",
-            path: "/dashboard/projects",
-            icon: <AccountTreeIcon className="text-[#009688]" />,
-            role: role.USER,
-        },
+        
         {
             label: "Admins",
             path: "/dashboard/users",
@@ -102,7 +104,11 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
             path: "pipelines",
             icon: <AccountTreeIcon className="text-[#9427a9]" />,
         },
-        
+        {
+            label: "Members",
+            path: "members",
+            icon: <GroupIcon className="text-[#ff5722]" />,
+        },
         {
             label: "Roles & Permissions",
             path: "roles-permissions",
@@ -111,11 +117,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
         },
         
         
-        {
-            label: "Members",
-            path: "members",
-            icon: <GroupIcon className="text-[#ff5722]" />,
-        },
+        
         {
             label: "Access Requests",
             path: "access-requests",
@@ -126,7 +128,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
     console.log(auth.userData?.orgRole);
 
     return (
-        <div className={`xl:w-[20%] lg:w-[20%] md:w-[17%]  w-full   md:static transition-transform transform absolute z-10   bg-[#15283c] sidebar h-screen overflow-y-auto pb-10  ${isOpen ? 'translate-x-0 ' : '-translate-x-full '} `}>
+        <div className={`xl:w-[20%] lg:w-[20%] md:w-[20%]  w-full   md:static transition-transform transform absolute z-10   bg-[#15283c] sidebar h-screen overflow-y-auto pb-10  ${isOpen ? 'translate-x-0 ' : '-translate-x-full '} `}>
             <div className="text-center text-white sm:text-2xl font-bold sidebar-title text-5xl h-[14%] bg-[#214162] flex items-center px-6 md:static  w-full">
                 <img src={profile} className="h-16 w-16 rounded-full lg:flex md:hidden flex" alt="logo" />
                 <div className="flex flex-col items-start justify-center 2xl:ml-7 xl:ml-3 lg:ml-2 md:ml-0 ml-4">
@@ -165,7 +167,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
                                     key={path}
                                     onClick={toggleSideBar}
                                     to={`/dashboard/projects/${projectName}/${path}`} 
-                                    className={`mt-2 text-white flex cursor-pointer hover:text-white rounded-2xl px-2 py-3 items-center ${pathname === path ? "text-white bg-[#8758ff]" : ""
+                                    className={`mt-2 text-white flex cursor-pointer hover:text-white rounded-lg  px-2 py-3 items-center ${pathname.includes(path) ? "text-white bg-[#214162]" : ""
                                         }`}
                                 >
                                     {icon}
@@ -181,7 +183,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
                                         key={path}
                                         onClick={toggleSideBar}
                                         to={path}
-                                        className={`mt-2 text-white flex cursor-pointer hover:text-white rounded-2xl px-2 py-3 items-center ${pathname === path ? "text-white bg-[#8758ff]" : ""
+                                        className={`mt-2 text-white flex cursor-pointer hover:text-white rounded-2xl px-2 py-3 items-center ${pathname === path ? "text-white bg-[#214162]" : ""
                                             }`}
                                     >
                                         {icon}

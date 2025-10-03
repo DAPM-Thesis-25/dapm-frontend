@@ -8,6 +8,7 @@ import Pipelines from "./pipeline";
 import PipelineDesign from "../../components/pipeline/pipelineDesign";
 import RolesAndPermissions from "./rolesAndPermissions";
 import PipelineResults from "./pipelineResults";
+import InetrnalAccessRequestPage from "./accessRequests";
 
 export default function ProjectLayout() {
     const location = useLocation();
@@ -39,16 +40,17 @@ export default function ProjectLayout() {
 
 
     return (
-        <>
+        <div className="w-full h-screen overflow-hidden">
             <Routes>
-                <Route path="/" element={<Navigate to="members" />} />
+                <Route path="/" element={<Navigate to="pipelines" />} />
                 <Route path="members" element={<Members />} />
                 <Route path="roles-permissions" element={<RolesAndPermissions />} />
                 <Route path="pipelines" element={<Pipelines />} />
+                <Route path="access-requests" element={<InetrnalAccessRequestPage />} />
                 <Route path="pipelines/:name" element={<PipelineDesign />} />
                 <Route path="pipelines/:name/view-result" element={<PipelineResults />} />
 
             </Routes>
-        </>
+        </div>
     )
 }

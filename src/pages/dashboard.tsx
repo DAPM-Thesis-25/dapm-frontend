@@ -37,17 +37,19 @@ export default function Dashboard() {
         && location.pathname.split("/").length > 5;
 
     return (
-        <div className="h-screen md:flex md:justify-between ">
+        <div className="h-screen md:flex md:justify-between w-screen">
             {(!hideSidebar) &&
                 <SideBar isOpen={isOpen} size={size} setIsOpen={setIsOpen} />
 
             }
-            <div className={`grow flex flex-col h-full  transition-all duration-300 ease-in-out `}>
+            <div className={`grow xl:w-[80%] lg:w-[80%] md:w-[80%] w-full flex flex-col h-full  transition-all duration-300 ease-in-out `}>
 
-                {(!hideSidebar) ? <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} /> : <PipelineNavbar />}
+                {(!hideSidebar) ? 
+                <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} /> 
+                : <PipelineNavbar />}
                 {/* <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} /> */}
                 <Routes>
-                    <Route path="/" element={<Navigate to="users" />} />
+                    <Route path="/" element={<Navigate to="projects" />} />
                     <Route path="users" element={<Users />} />
                     <Route path="partners" element={<Partners />} />
                     <Route path="processing-elements" element={<ProcessingElements />} />

@@ -134,8 +134,12 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
 
     // start with local
     for (const p of local) {
-      byName.set(p.name, p);
-    }
+    byName.set(p.name, {
+      ...p,
+      status: "draft", // always reset local pipelines
+      source: "local",
+    });
+  }
 
     // override with remote (remote wins if same name)
     for (const p of remote) {
@@ -233,10 +237,25 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
     } catch (error) {
       setActionLoading((prev) => ({ ...prev, validate: false }));
       if (axios.isAxiosError(error)) {
+        let backendMsg: string;
+
+        if (typeof error.response?.data === "string") {
+          try {
+            const parsed = JSON.parse(error.response.data);
+            backendMsg = parsed.error || JSON.stringify(parsed);
+          } catch {
+            backendMsg = error.response.data;
+          }
+        } else {
+          backendMsg =
+            error.response?.data?.error ||
+            error.response?.data?.message ||
+            error.message;
+        }
+
         return {
           success: false,
-          message: error.response?.data?.message || error.message || "Pipeline validation failed",
-          error: error.response?.data?.error
+          message: backendMsg,
         };
       }
       return { success: false, message: "Pipeline validation failed due to unknown error" };
@@ -270,15 +289,55 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
     } catch (error) {
       setActionLoading((prev) => ({ ...prev, build: false }));
       if (axios.isAxiosError(error)) {
+        // let backendMsg: string;
+
+        const backendMsg = mapBackendErrorToMessage(error);
+
         return {
           success: false,
-          message: error.response?.data?.message || error.message || "Pipeline build failed",
-          error: error.response?.data?.error,
+          message: backendMsg,
         };
       }
       return { success: false, message: "Pipeline build failed due to unknown error" };
     }
   };
+
+  function mapBackendErrorToMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const raw = error.response?.data;
+
+    // Backend gave you { error: "Failed to deserialize JSON to object: {\"error\":\"Token verification failed\"}" }
+    if (raw?.error && typeof raw.error === "string") {
+      const inner = raw.error;
+
+      // Try to extract the actual inner JSON {"error":"..."}
+      const match = inner.match(/{\"error\":\"([^"]+)\"}/);
+      if (match) {
+        return match[1]; // → "Token verification failed"
+      }
+
+      // Or keyword match
+      if (inner.includes("revoked")) {
+        return "Your session has been revoked. Please log in again.";
+      }
+      if (inner.includes("verification failed")) {
+        return "Token verification failed.";
+      }
+      if (inner.includes("missing jti")) {
+        return "Invalid authentication token.";
+      }
+
+      // fallback: just return the original string
+      return inner;
+    }
+
+    return raw?.message || error.message || "Unexpected error";
+  }
+
+  return "Unknown error occurred.";
+}
+
+
 
   const executePipeline = async (orgDomainName: string, pipeline: Pipeline) => {
     console.log("Executing pipeline:", orgDomainName);
@@ -313,7 +372,7 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
     }
   };
 
-    const terminatePipeline = async (orgDomainName: string, pipeline: Pipeline) => {
+  const terminatePipeline = async (orgDomainName: string, pipeline: Pipeline) => {
     console.log("Terminating pipeline:", orgDomainName);
     setActionLoading((prev) => ({ ...prev, terminate: true }));
     try {

@@ -19,6 +19,7 @@ export default function PipelineNavbar() {
     const [errorMessage, setErrorMessage] = useState("");
     const [popupOpen, setPopupOpen] = useState(false);
     const [title, setTitle] = useState("");
+    const proj = useProject();
 
     // control graph state here so the right sidebar can update nodes
     const draft = useMemo(() => pipelines.find((p) => p.name === pipelineName), [pipelines, pipelineName]);
@@ -34,7 +35,7 @@ export default function PipelineNavbar() {
                 <ArrowBackIcon className="text-[#ff5722]"></ArrowBackIcon>
             </div>
             <div className='w-1/3 flex justify-center '>
-                <h1 className="text-white text-2xl font-semibold">{pipelineName}</h1>
+                <h1 className="text-white text-2xl font-semibold">{pipelineName.charAt(0).toUpperCase()}{pipelineName.slice(1)} <span className="text-green-400 font-normal">({draft?.status})</span></h1>
             </div>
             <div className='w-1/3 flex justify-end '>
                 {
@@ -42,6 +43,11 @@ export default function PipelineNavbar() {
 
                         <button
                             className="bg-green-600 text-white px-4 py-2 rounded"
+                            disabled={
+                                proj.projectRolePermActions?.some(
+                                    (perm) => perm.action === "VALIDATE_PIPELINE"
+                                ) ? false : true
+                            }
                             onClick={async () => {
                                 if (!draft) return;
 
@@ -85,6 +91,11 @@ export default function PipelineNavbar() {
                             </button>
                         ) : draft.status === "configured" && !actionLoading.build ? (
                             <button
+                                hidden={
+                                    proj.projectRolePermActions?.some(
+                                        (perm) => perm.action === "BUILD_PIPELINE"
+                                    ) ? false : true
+                                }
                                 className="bg-green-600 text-white px-4 py-2 rounded"
                                 onClick={async () => {
                                     if (!draft) return;
@@ -113,6 +124,11 @@ export default function PipelineNavbar() {
                             </button>
                         ) : draft.status === "built" && !actionLoading.execute ? (
                             <button
+                                hidden={
+                                    proj.projectRolePermActions?.some(
+                                        (perm) => perm.action === "EXECUTE_PIPELINE"
+                                    ) ? false : true
+                                }
                                 className="bg-green-600 text-white px-4 py-2 rounded"
                                 onClick={async () => {
                                     if (!draft) return;
@@ -140,6 +156,11 @@ export default function PipelineNavbar() {
                             </button>
                         ) : draft.status === "executing" && !actionLoading.terminate ? (
                             <button
+                                hidden={
+                                    proj.projectRolePermActions?.some(
+                                        (perm) => perm.action === "TERMINATE_PIPELINE"
+                                    ) ? false : true
+                                }
                                 className="bg-red-600 text-white px-4 py-2 rounded"
                                 onClick={async () => {
                                     if (!draft) return;

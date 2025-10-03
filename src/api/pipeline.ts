@@ -40,6 +40,19 @@ export interface ConfigureValidation{
     missingPermissions: MissingPermission[];
 }
 
+export interface PipelineProcessingElementRequestDto {
+    processingElement: string;
+    pipelineName: string;
+    requestedDurationHours: number;
+}
+
+export interface RequestResponse {
+    requestId: string;
+    requestStatus: "PENDING" | "APPROVED" | "REJECTED"; 
+    token: string;
+}
+
+
 export const designPipeline = (orgDomainName: string, data: DesignPipeline) =>
     axiosInstance.post<any>(`/api/pipeline/validation/design-pipeline`, data,
         { baseURL: `http://localhost:${orgDomainName}` });
@@ -82,3 +95,13 @@ export const getPipelinePetriNet = (orgDomainName: string, pipelineName: string)
     axiosInstance.get<string>(`/api/pipeline/instances/${pipelineName}/petri-net`, {
         baseURL: `http://localhost:${orgDomainName}`,
     });
+
+export const initiatePeerRequest = (
+    orgDomainName: string,
+    request: PipelineProcessingElementRequestDto
+) =>
+    axiosInstance.post<RequestResponse>(
+        `/api/pipeline/configuration/request`,
+        request,
+        { baseURL: `http://localhost:${orgDomainName}` }
+    );

@@ -1,13 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CheckCircle, Clock, Trash2, Plus, Play } from "lucide-react"; // optional icons; install lucide-react or swap for MUI
 import { usePipeline } from "../../context/pipelineProvider";
+import BtnPopup from "../../components/shared/btnPopup";
+import Popup from "../../components/shared/popup";
+import PersonIcon from '@mui/icons-material/Person';
 // npm i lucide-react
 
 export default function Pipelines() {
     const navigate = useNavigate();
     const location = useLocation();
     const { pipelines, loading, refreshPipelines, createDraft, deleteDraft } = usePipeline();
+    const [openPopup, setOpenPopup] = useState(false);
+    const [pipelineNameInput, setPipelineNameInput] = useState("");
 
     // derive projectName like your other screens do
     const pathname = location.pathname;
@@ -19,11 +24,13 @@ export default function Pipelines() {
     }, [projectName]);
 
     const handleCreate = () => {
-        const name = window.prompt("Enter a name for your new pipeline:");
-        if (!name || !name.trim()) return; // user cancelled or empty name
 
-        const p = createDraft(projectName, name.trim());
-        navigate(`/dashboard/projects/${projectName}/pipelines/${p.name}`);
+        // const name = window.prompt("Enter a name for your new pipeline:");
+        // if (!name || !name.trim()) return; // user cancelled or empty name
+
+        // const p = createDraft(projectName, name.trim());
+        setOpenPopup(true);
+        // navigate(`/dashboard/projects/${projectName}/pipelines/${p.name}`);
     };
 
     const openPipeline = (name: string) => {
@@ -44,19 +51,56 @@ export default function Pipelines() {
                     <Plus size={18} />
                     New draft
                 </button>
+
+                <Popup title="New Pipeline" openPopup={openPopup} setOpenPopup={() => setOpenPopup(false)} >
+                    <div className="p-4">
+                        {/* <h2 className="text-lg font-semibold mb-4">Create New Pipeline</h2> */}
+                        {/* <p className="mb-4">Enter a name for your new pipeline:</p> */}
+                        <div className=" w-full flex flex-col h-fit items-start content-start mb-2">
+                            <h4 className="text-sm font-bold text-[#ffffff4d] ">Pipeline Name</h4>
+                            <div className="signup-input h-fit relative border-2 p-1 border-white  w-full  flex items-center sm:rounded-none rounded-md">
+                                <PersonIcon className=" text-white "></PersonIcon>
+
+                                <input
+                                    type="text"
+                                    placeholder="Pipeline Name"
+                                    className="w-full  h-fit pl-2  bg-transparent text-white"
+                                    name="username"
+                                    onChange={e => setPipelineNameInput(e.target.value)}
+                                    onBlur={e => setPipelineNameInput(e.target.value)}
+                                    value={pipelineNameInput}
+                                />
+                            </div>
+                            {pipelineNameInput && pipelineNameInput.length < 3 ? (
+                                <div className="text-red-500 text-xs text-start mt-1">Pipeline name must be at least 3 characters long</div>
+                            ) : null}
+                        </div>
+                        <div className="w-full flex items-end grow justify-self-end   justify-center mt-8">
+                            <button 
+                            onClick={() => {
+                                const p = createDraft(projectName, pipelineNameInput.trim());
+                                setOpenPopup(false);
+                                navigate(`/dashboard/projects/${projectName}/pipelines/${p.name}`);
+                            }} 
+                            disabled={!pipelineNameInput || pipelineNameInput.length < 3}
+                             className="text-white text-xl sm:w-fit w-full sm:px-10 p-2 px-6 bg-[#15283c] hover:bg-[#ff5722] border-2 border-white rounded-md">ADD</button>
+                        </div>
+                    </div>
+                </Popup>
+
             </div>
 
-            <div className="p-5 md:p-7">
+            < >
                 {loading ? (
                     <div className="text-gray-500">Loading pipelines…</div>
                 ) : pipelines.length === 0 ? (
                     <div className="text-gray-500">No pipelines yet. Create your first draft.</div>
                 ) : (
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-3 mt-5">
                         {pipelines.map((p) => (
                             <div
                                 key={p.id}
-                                className="bg-white rounded-lg shadow-md border p-4 flex flex-col justify-between"
+                                className="bg-white rounded-lg shadow-md border 2xl:p-5 p-3 flex flex-col justify-between "
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
@@ -69,41 +113,41 @@ export default function Pipelines() {
                                         <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
                                             <CheckCircle size={14} /> Validated
                                         </span>
-                                    ) 
-                                    : p.status === "built" ? (
-                                        <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
-                                            <CheckCircle size={14} /> Built
-                                        </span>
                                     )
-                                    : p.status === "configured" ? (
-                                        <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
-                                            <CheckCircle size={14} /> Configured
-                                        </span>
-                                    )
-                                    : p.status === "executing" ? (
-                                        <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
-                                            <CheckCircle size={14} /> Executing
-                                        </span>
-                                    )
-                                    : p.status === "terminated" ? (
-                                        <span className="inline-flex items-center gap-1 text-xs bg-red-100 text-red-700 font-medium px-2 py-1 rounded">
-                                            <Clock size={14} /> Terminated
-                                        </span>
-                                    )
-                                    : p.status === "draft" ? (
-                                        <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 font-medium px-2 py-1 rounded">
-                                            <Clock size={14} /> Draft
-                                        </span>
-                                    )
-                                        : (<span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-700 font-medium px-2 py-1 rounded">
-                                            Unknown
-                                        </span>
-                                    )}
+                                        : p.status === "built" ? (
+                                            <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
+                                                <CheckCircle size={14} /> Built
+                                            </span>
+                                        )
+                                            : p.status === "configured" ? (
+                                                <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
+                                                    <CheckCircle size={14} /> Configured
+                                                </span>
+                                            )
+                                                : p.status === "executing" ? (
+                                                    <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded">
+                                                        <CheckCircle size={14} /> Executing
+                                                    </span>
+                                                )
+                                                    : p.status === "terminated" ? (
+                                                        <span className="inline-flex items-center gap-1 text-xs bg-red-100 text-red-700 font-medium px-2 py-1 rounded">
+                                                            <Clock size={14} /> Terminated
+                                                        </span>
+                                                    )
+                                                        : p.status === "draft" ? (
+                                                            <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 font-medium px-2 py-1 rounded">
+                                                                <Clock size={14} /> Draft
+                                                            </span>
+                                                        )
+                                                            : (<span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-700 font-medium px-2 py-1 rounded">
+                                                                Unknown
+                                                            </span>
+                                                            )}
                                 </div>
 
                                 <div className="text-xs text-gray-500 mt-2">
                                     Updated {new Date(p.updatedAt).toLocaleString()}
-                                    <span className="ml-2">• {p.source === "remote" ? "from database" : "local"}</span>
+                                    <span className="">• {p.source === "remote" ? "from database" : "local"}</span>
                                 </div>
 
                                 <div className="mt-4 flex items-center justify-between">
@@ -132,7 +176,7 @@ export default function Pipelines() {
                         ))}
                     </div>
                 )}
-            </div>
+            </>
         </div>
     );
 }

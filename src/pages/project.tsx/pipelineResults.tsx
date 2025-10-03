@@ -28,7 +28,7 @@ export default function PipelineResults() {
         };
 
         fetchDot();
-        const interval = setInterval(fetchDot, 5000);
+        const interval = setInterval(fetchDot, 3000);
         return () => clearInterval(interval);
     }, [pipelineName]);
 

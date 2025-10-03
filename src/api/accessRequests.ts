@@ -24,7 +24,7 @@ export const getAllExternalAccessRequests = (orgDomainName: string) =>
     { baseURL: `http://localhost:${orgDomainName}` } );
 
 export const getAllAccessRequests = (orgDomainName: string) => 
-    axiosInstance.get<AccessRequest[]>(`/api/pipeline/configuration/all-requests`,
+    axiosInstance.get<AccessRequest[]>(`/api/pipeline/configuration/requests`,
     { baseURL: `http://localhost:${orgDomainName}` } );
 
 export const takeDecisionOnAccessRequest = (orgDomainName: string, data: TakeDecisionRequest) => 
