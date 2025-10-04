@@ -362,10 +362,13 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
     } catch (error) {
       setActionLoading((prev) => ({ ...prev, execute: false }));
       if (axios.isAxiosError(error)) {
+        // let backendMsg: string;
+
+        const backendMsg = mapBackendErrorToMessage(error);
+
         return {
           success: false,
-          message: error.response?.data?.message || error.message || "Pipeline execution failed",
-          error: error.response?.data?.error,
+          message: backendMsg,
         };
       }
       return { success: false, message: "Pipeline execution failed due to unknown error" };
@@ -395,10 +398,13 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
     } catch (error) {
       setActionLoading((prev) => ({ ...prev, terminate: false }));
       if (axios.isAxiosError(error)) {
+        // let backendMsg: string;
+
+        const backendMsg = mapBackendErrorToMessage(error);
+
         return {
           success: false,
-          message: error.response?.data?.message || error.message || "Pipeline termination failed",
-          error: error.response?.data?.error,
+          message: backendMsg,
         };
       }
       return { success: false, message: "Pipeline termination failed due to unknown error" };
