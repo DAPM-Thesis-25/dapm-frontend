@@ -48,7 +48,7 @@ export default function AccessRequestPage() {
         {/* lg:mt-[5%] sm:mt-[10%] mt-[12%] */}
         {/* <Header title="Users" button={<AddMemberButton/>} /> */}
         <div className="w-full bg-white md:p-7 p-5 shadow-md  flex justify-between">
-            <h1 className="text-2xl font-semibold">Access Requests</h1>
+            <h1 className="text-2xl font-semibold">External Access Requests</h1>
             {/* {
                 authUser.userData?.orgRole == "ADMIN" && <div className=""><AddMemberButton /></div>
             } */}

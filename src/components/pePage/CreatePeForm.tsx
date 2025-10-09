@@ -74,7 +74,7 @@ const CreateProcessingElement: React.FC<CreateProcessingElementFormProps> = ({ s
 
             <div className="flex justify-between flex-wrap">
                 <div className=" sm:w-[48%] w-full flex flex-col h-fit items-start content-start mb-2">
-                    <h4 className="text-sm font-bold text-[#ffffff4d] ">Template</h4>
+                    <h4 className="text-sm font-bold text-[#ffffff4d] ">Template(.java)</h4>
                     <div className="signup-input h-fit relative border-2 p-1 border-white  w-full  flex items-center sm:rounded-none rounded-md">
                         <PersonIcon className=" text-white "></PersonIcon>
 
@@ -90,7 +90,7 @@ const CreateProcessingElement: React.FC<CreateProcessingElementFormProps> = ({ s
                     ) : null}
                 </div>
                 <div className=" sm:w-[48%] w-full flex flex-col h-fit items-start content-start mb-2">
-                    <h4 className="text-sm font-bold text-[#ffffff4d] ">Config Schema</h4>
+                    <h4 className="text-sm font-bold text-[#ffffff4d] ">Config Schema (.json)</h4>
                     <div className="signup-input h-fit relative border-2 p-1 border-white  w-full  flex items-center sm:rounded-none rounded-md">
                         <PersonIcon className=" text-white "></PersonIcon>
 

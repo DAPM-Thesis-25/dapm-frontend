@@ -7,38 +7,49 @@ import PersonIcon from '@mui/icons-material/Person';
 import PasswordIcon from '@mui/icons-material/Password';
 import DomainIcon from '@mui/icons-material/Domain';
 
-export default function LoginForm(){
+export default function LoginForm() {
     const { loginAction } = useAuth();
     const [serverError, setServerError] = useState<string | any>(null);
     const navigate = useNavigate();
     const formik = useFormik({
-    initialValues: {
-      username: "",
-      password: "",
-      orgDomainName: "", 
-    },
-    validationSchema: Yup.object({
-      username: Yup.string().required("Username is required"),
-      password: Yup.string().required("Password is required"),
-      orgDomainName: Yup.string().required(
-        "Organization domain name is required"
-      ),
-    }),
-    onSubmit: async (values, { setSubmitting, setErrors }) => {
-      const result = await loginAction({
-        username: values.username,
-        password: values.password
-      }, values.orgDomainName);
+        initialValues: {
+            username: "",
+            password: "",
+            orgDomainName: "",
+        },
+        validationSchema: Yup.object({
+            username: Yup.string().required("Username is required"),
+            password: Yup.string().required("Password is required"),
+            orgDomainName: Yup.string().required(
+                "Organization domain name is required"
+            ),
+        }),
+        onSubmit: async (values, { setSubmitting, setErrors }) => {
+            let mappedOrgDomain = values.orgDomainName;
 
-      if (result) {
-        // result will be error string if login failed
-        setServerError(result);
-        // setErrors({ username: result });
-      }
-      setSubmitting(false);
-    },
-  });
-    return(
+            if (values.orgDomainName.toLowerCase() === "orga") {
+                mappedOrgDomain = "8081";
+            } else if (values.orgDomainName.toLowerCase() === "orgb") {
+                mappedOrgDomain = "8082";
+            }
+
+            const result = await loginAction(
+                {
+                    username: values.username,
+                    password: values.password,
+                },
+                mappedOrgDomain // use the mapped value here
+            );
+
+            if (result) {
+                setServerError(result);
+            }
+
+            setSubmitting(false);
+        },
+
+    });
+    return (
         <form className="sm:h-[90%]  h-[65%]  login login2 flex  flex-col w-full" onSubmit={formik.handleSubmit}>
 
 
@@ -62,49 +73,49 @@ export default function LoginForm(){
                     <div className="text-red-500 text-xs">{formik.errors.username}</div>
                 ) : null}
                 {
-                    serverError && serverError[0].code==="DuplicateUserName"? <div className="text-red-500 text-xs">{serverError[0].description}</div>:null
+                    serverError && serverError[0].code === "DuplicateUserName" ? <div className="text-red-500 text-xs">{serverError[0].description}</div> : null
                 }
             </div>
 
 
 
             <div className="w-full flex flex-col">
-            <div className="login-input relative  border-2 p-1 border-[#15283c]  w-full  sm:mt-6 mt-2 flex items-center sm:rounded-none rounded-md">
-                <PasswordIcon className=" text-[#15283c] "></PasswordIcon>
-                <input
-                    type="password"
-                    placeholder="Password"
-                    className="w-full  pl-2  bg-transparent text-[#15283c]"
-                    name="password"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.password}
-                />
-                
-            </div>
-            {formik.touched.password && formik.errors.password ? (
+                <div className="login-input relative  border-2 p-1 border-[#15283c]  w-full  sm:mt-6 mt-2 flex items-center sm:rounded-none rounded-md">
+                    <PasswordIcon className=" text-[#15283c] "></PasswordIcon>
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        className="w-full  pl-2  bg-transparent text-[#15283c]"
+                        name="password"
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.password}
+                    />
+
+                </div>
+                {formik.touched.password && formik.errors.password ? (
                     <div className="text-red-500 text-xs">{formik.errors.password}</div>
                 ) : null}
                 {
-                    serverError ? <div className="text-red-500 text-xs">{serverError}</div>:null
+                    serverError ? <div className="text-red-500 text-xs">{serverError}</div> : null
                 }
             </div>
 
             <div className="w-full flex flex-col">
-            <div className="login-input relative  border-2 p-1 border-[#15283c]  w-full  sm:mt-6 mt-2 flex items-center sm:rounded-none rounded-md">
-                <DomainIcon className=" text-[#15283c] "></DomainIcon>
-                <input
-                    type="text"
-                    placeholder="orgDomainName"
-                    className="w-full  pl-2  bg-transparent text-[#15283c]"
-                    name="orgDomainName"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.orgDomainName}
-                />
-                
-            </div>
-            {formik.touched.orgDomainName && formik.errors.orgDomainName ? (
+                <div className="login-input relative  border-2 p-1 border-[#15283c]  w-full  sm:mt-6 mt-2 flex items-center sm:rounded-none rounded-md">
+                    <DomainIcon className=" text-[#15283c] "></DomainIcon>
+                    <input
+                        type="text"
+                        placeholder="orgDomainName"
+                        className="w-full  pl-2  bg-transparent text-[#15283c]"
+                        name="orgDomainName"
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.orgDomainName}
+                    />
+
+                </div>
+                {formik.touched.orgDomainName && formik.errors.orgDomainName ? (
                     <div className="text-red-500 text-xs">{formik.errors.orgDomainName}</div>
                 ) : null}
                 {/* {

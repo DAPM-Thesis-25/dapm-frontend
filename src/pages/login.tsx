@@ -1,6 +1,8 @@
+import { useAuth } from "../auth/authProvider";
 import LoginForm from "../components/loginForm";
 // import loginBg from "../imgs/login-bg.jpg";
 export default function Login() {
+    const auth = useAuth();
     return (
         // sm:bg-[url(./imgs/login-bg.jpg)]
         // sm:bg-none bg-[url(./imgs/login-bg.jpg)] 
@@ -12,6 +14,11 @@ export default function Login() {
                 <h2 className="text-[#15283c] text-center text-3xl font-bold">DAPM</h2>
                 <LoginForm></LoginForm>
             </div>
+            {auth.loadingLogin &&
+                <div className="z-50 flex justify-center items-center absolute top-0 left-0 h-full w-full backdrop-blur-sm  px-12 py-8 sm:border-6 border-white sm:rounded-xl">
+                    <div className="loader "></div>
+                </div>
+            }
         </div>
     )
 }

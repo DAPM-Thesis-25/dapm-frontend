@@ -3,6 +3,7 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import CloseIcon from '@mui/icons-material/Close';
 import { useOrg } from '../../context/orgsProvider';
 import { usePE } from '../../context/processingElementsProvider';
+import { useUser } from '../../context/usersProvides';
 
 interface PopupProps {
     openPopup: boolean;
@@ -13,6 +14,7 @@ interface PopupProps {
 }
 export default function Popup({ openPopup, setOpenPopup, title, children, dialogClassName }: PopupProps) {
     //  const pe = usePE();
+    const user= useUser();
 
 
     return (
@@ -24,11 +26,11 @@ export default function Popup({ openPopup, setOpenPopup, title, children, dialog
 
                     <DialogTitle className="font-bold text-white sm:text-3xl text-xl text-center ">{title}</DialogTitle>
                     {/* <CreateProcessingElement setOpenAddProcessingElementPopup={setOpenProcessingElementPopup} ></CreateProcessingElement> */}
-                    {/* {pe.loadingProcessingElement &&
+                    {user.loadingRegister &&
                         <div className="z-50 flex justify-center items-center absolute top-0 left-0 h-full w-full backdrop-blur-sm  px-12 py-8 sm:border-6 border-white sm:rounded-xl">
                             <div className="loader "></div>
                         </div>
-                    } */}
+                    }
                     {children}
                 </DialogPanel>
             </div>

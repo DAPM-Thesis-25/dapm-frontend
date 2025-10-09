@@ -13,6 +13,7 @@ export default function Partners() {
     const orgData = useOrg();
 
     const [openUpgradePopup, setOpenUpgradePopup] = useState(false);
+    const [selectedOrg, setSelectedOrg] = useState<string>("");
 
     useEffect(() => {
         orgData.getSubscribers();
@@ -36,7 +37,7 @@ export default function Partners() {
             </div>
             {orgData.subscribers && orgData.subscribers.length > 0 && (
                 <div className="px-3 mt-5">
-                    <div className="w-full md:p-7 p-5 text-2xl text-[#ff5722] font-semibold">
+                    <div className="w-full py-3 text-2xl text-[#ff5722] font-semibold">
                         Subscribers <span className="text-sm text-black ml-2">(wish to use our processing elements)</span>
                     </div>
 
@@ -54,7 +55,7 @@ export default function Partners() {
                                     <p className="font-medium">
                                         {org.name[0].toUpperCase()}{org.name.slice(1)}
                                     </p>
-                                    <p className="text-sm text-[#757575]">{org.tier}</p>
+                                    <p className="text-xs text-[#757575]">Their tier with our org: {org.tier}</p>
                                 </div>
                             </div>
                         ))}
@@ -87,16 +88,18 @@ export default function Partners() {
                                         {org.name[0].toUpperCase()}
                                         {org.name.slice(1)}
                                     </p>
-                                    <p className="text-sm text-[#757575]">current tier: {org.tier}</p>
-                                    
+                                    <p className="2xl:text-sm text-xs text-[#757575]">Your tier with {org.name}: {org.tier}</p>
+
                                     <>
                                         <button
-                                        onClick={() => setOpenUpgradePopup(true)}
-                                        className="text-[#ff5722] text-xs border-2 p-1 mt-1 hover:bg-[#ff5722] hover:text-white border-[#ff5722] rounded"
-                                    >
-                                        Upgrade My Tier
-                                    </button>
-                                        <UpgradePopup openUpgradePopup={openUpgradePopup} setOpenUpgradePopup={setOpenUpgradePopup} orgName={org.name}/>
+                                            onClick={() => {
+                                                setSelectedOrg(org.name);
+                                                setOpenUpgradePopup(true);
+                                            }}
+                                            className="text-[#ff5722] text-xs border-2 p-1 mt-1 hover:bg-[#ff5722] hover:text-white border-[#ff5722] rounded"
+                                        >
+                                            Upgrade Your Tier
+                                        </button>
                                     </>
                                 </div>
                             </div>
@@ -105,12 +108,16 @@ export default function Partners() {
                 </div>
             )}
 
+
             {
-            orgData.publishers ? orgData.publishers.length === 0 
-            : orgData.subscribers ? orgData.subscribers.length === 0
-            && (
-                <div className="w-full grow flex  md:p-7 p-5 text-2xl text-[#] font-semibold justify-center items-center">No Partner Available</div>
-            ) : null}
+                orgData.publishers ? orgData.publishers.length === 0
+                    : orgData.subscribers ? orgData.subscribers.length === 0
+                        && (
+                            <div className="w-full grow flex  md:p-7 p-5 text-2xl text-[#] font-semibold justify-center items-center">No Partner Available</div>
+                        ) : null}
+
+            <UpgradePopup openUpgradePopup={openUpgradePopup} setOpenUpgradePopup={setOpenUpgradePopup} orgName={selectedOrg} />
+
         </div>
     )
 }

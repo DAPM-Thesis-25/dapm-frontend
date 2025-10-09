@@ -6,6 +6,7 @@ import { dbPipelineToGraph } from "../utils/dbPipelineToGraph";
 import { buildPipelineApi, checkConfigurationStatusPipeline, designPipeline, executePipelineApi, getPipelines, getValidatedPipeline, terminatePipelineApi } from "../api/pipeline";
 import { graphToDesignPipeline } from "../utils/graphToDesignPipeline";
 import axios from "axios";
+import { normalizeConfig, unflattenConfig } from "../utils/unflattenConfig";
 
 // Basic types
 export type PipelineStatus = "draft" | "validated" | "built" | "executing" | "configured" | "terminated";
@@ -134,12 +135,12 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
 
     // start with local
     for (const p of local) {
-    byName.set(p.name, {
-      ...p,
-      status: "draft", // always reset local pipelines
-      source: "local",
-    });
-  }
+      byName.set(p.name, {
+        ...p,
+        status: "draft", // always reset local pipelines
+        source: "local",
+      });
+    }
 
     // override with remote (remote wins if same name)
     for (const p of remote) {
@@ -211,8 +212,22 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
     setActionLoading((prev) => ({ ...prev, validate: true }));
     if (!pipeline.graph) throw new Error("Pipeline has no graph to validate");
 
+    // 🔥 Unflatten + normalize every node config before building DTO
+  const normalizedNodes = pipeline.graph.nodes.map((n) => {
+    const unflattened = unflattenConfig(n.data?.config || {});
+    const fixed = normalizeConfig(unflattened);
+
+    return {
+      ...n,
+      data: {
+        ...n.data,
+        config: fixed,
+      },
+    };
+  });
+
     const dto = graphToDesignPipeline(
-      pipeline.graph.nodes,
+      normalizedNodes,
       pipeline.graph.edges,
       pipeline.name,
       pipeline.projectName
@@ -303,39 +318,39 @@ const PipelineProvider: React.FC<PipelineProviderProps> = ({ children }) => {
   };
 
   function mapBackendErrorToMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    const raw = error.response?.data;
+    if (axios.isAxiosError(error)) {
+      const raw = error.response?.data;
 
-    // Backend gave you { error: "Failed to deserialize JSON to object: {\"error\":\"Token verification failed\"}" }
-    if (raw?.error && typeof raw.error === "string") {
-      const inner = raw.error;
+      // Backend gave you { error: "Failed to deserialize JSON to object: {\"error\":\"Token verification failed\"}" }
+      if (raw?.error && typeof raw.error === "string") {
+        const inner = raw.error;
 
-      // Try to extract the actual inner JSON {"error":"..."}
-      const match = inner.match(/{\"error\":\"([^"]+)\"}/);
-      if (match) {
-        return match[1]; // → "Token verification failed"
+        // Try to extract the actual inner JSON {"error":"..."}
+        const match = inner.match(/{\"error\":\"([^"]+)\"}/);
+        if (match) {
+          return match[1]; // → "Token verification failed"
+        }
+
+        // Or keyword match
+        if (inner.includes("revoked")) {
+          return "Your session has been revoked. Please log in again.";
+        }
+        if (inner.includes("verification failed")) {
+          return "Token verification failed.";
+        }
+        if (inner.includes("missing jti")) {
+          return "Invalid authentication token.";
+        }
+
+        // fallback: just return the original string
+        return inner;
       }
 
-      // Or keyword match
-      if (inner.includes("revoked")) {
-        return "Your session has been revoked. Please log in again.";
-      }
-      if (inner.includes("verification failed")) {
-        return "Token verification failed.";
-      }
-      if (inner.includes("missing jti")) {
-        return "Invalid authentication token.";
-      }
-
-      // fallback: just return the original string
-      return inner;
+      return raw?.message || error.message || "Unexpected error";
     }
 
-    return raw?.message || error.message || "Unexpected error";
+    return "Unknown error occurred.";
   }
-
-  return "Unknown error occurred.";
-}
 
 
 

@@ -225,6 +225,8 @@ export default function PipelineDesign() {
     pe.getPes();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  
+
   useEffect(() => {
     if (projectName) {
       refreshPipelines(projectName);
@@ -265,6 +267,7 @@ export default function PipelineDesign() {
     }
   };
 
+  
   // helper to update config of selected node (immutably)
   const updateSelectedNodeConfig = (key: string, value: any) => {
     if (!selectedNode) return;
@@ -288,8 +291,61 @@ export default function PipelineDesign() {
     );
   };
 
+  const renderSchema = useCallback(
+    (schema: any, basePath: string[] = []) => {
+      if (!schema || !schema.properties) return null;
+
+      return Object.entries(schema.properties).map(([key, def]: [string, any]) => {
+        const fullPath = [...basePath, key];
+        const fullKey = fullPath.join(".");
+
+        if (def.type === "object") {
+          return (
+            <div key={fullKey} className="ml-2 border-l border-gray-600 pl-3 mt-2">
+              <label className="block text-sm font-semibold mb-1 text-blue-200">
+                {key}
+              </label>
+              {renderSchema(def, fullPath)}
+            </div>
+          );
+        }
+
+        const val =
+          (selectedNode?.data?.config as Record<string, any>)?.[fullKey] ?? "";
+
+        return (
+          <div key={fullKey} className="mb-3">
+            <label className="block text-sm font-medium mb-1">
+              {key}
+              {Array.isArray(schema.required) &&
+                schema.required.includes(key) && (
+                  <span className="ml-1 text-red-300">*</span>
+                )}
+            </label>
+            <input
+              type={def.type === "number" ? "number" : "text"}
+              className="w-full p-2 rounded text-black"
+              value={val}
+              onChange={(e) =>
+                updateSelectedNodeConfig(fullKey, e.target.value)
+              }
+            />
+            {def.description && (
+              <p className="text-xs text-gray-300 mt-1">{def.description}</p>
+            )}
+          </div>
+        );
+      });
+    },
+    [selectedNode, updateSelectedNodeConfig]
+  );
+
+
   if (loading) return <div className="p-6">Loading pipeline…</div>;
   if (!draft) return <div className="p-6">Pipeline not found</div>;
+
+  // Recursive renderer for JSON schema
+  
 
   return (
     <div className="flex h-screen">
@@ -347,20 +403,20 @@ export default function PipelineDesign() {
       </div>
 
       {/* Right Sidebar for Node Configuration */}
-      <aside className="w-72 bg-[#15283c] p-4 border-l overflow-y-auto text-white">
-        
+      <aside className="w-72 bg-[#15283c] p-4 pb-10 border-l overflow-y-auto text-white">
+
 
         {draft.status === "executing" && (
           <>
-          <h2 className="text-lg font-semibold mb-4">Results</h2>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded w-full  mb-4"
-            onClick={() => navigate(`view-result`)}
-          >
-            View Results
-          </button>
+            <h2 className="text-lg font-semibold mb-4">Results</h2>
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded w-full  mb-4"
+              onClick={() => navigate(`view-result`)}
+            >
+              View Results
+            </button>
           </>
-        )} 
+        )}
 
         <h2 className="text-lg font-semibold mb-4">Configuration</h2>
 
@@ -396,49 +452,8 @@ export default function PipelineDesign() {
               }
 
               return (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                  }}
-                >
-                  {keys.map((key) => {
-                    const def = properties[key] || {};
-                    const isNumber = def.type === "number";
-
-                    const val =
-                      (selectedNode.data?.config as Record<string, any>)?.[key] ?? "";
-
-                    return (
-                      <div key={key} className="mb-4">
-                        <label className="block text-sm font-medium mb-1">
-                          {key}
-                          {Array.isArray(schema.required) &&
-                            schema.required.includes(key) && (
-                              <span className="ml-1 text-red-300">*</span>
-                            )}
-                        </label>
-                        <input
-                          disabled={draft.status !== "draft"}
-                          type={isNumber ? "number" : "text"}
-                          minLength={def.minLength}
-                          maxLength={def.maxLength}
-                          className="w-full p-2 rounded text-black"
-                          value={val}
-                          onChange={(e) => {
-                            const newValue = isNumber
-                              ? Number(e.target.value)
-                              : e.target.value;
-                            updateSelectedNodeConfig(key, newValue);
-                          }}
-                        />
-                        {def.description && (
-                          <p className="text-xs text-gray-300 mt-1">
-                            {def.description}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
+                <form onSubmit={(e) => e.preventDefault()}>
+                  {renderSchema(schema)}
                 </form>
               );
             })()}

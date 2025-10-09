@@ -31,6 +31,8 @@ interface AuthContextType {
   loginAction: (data: LoginRequest, domainName?: string) => Promise<string | void>;
   logOut: () => void;
   setUserData: React.Dispatch<React.SetStateAction<UserData | null>>;
+  loadingLogin: boolean;
+
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,6 +45,8 @@ interface AuthProviderProps {
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // const [user, setUser] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [loadingLogin, setLoadingLogin] = useState<boolean>(false);
+  // const [orgDomainName, setOrgDomainName] = useState<string | null>(null);
   const [token, setToken] = useState<string>(
     localStorage.getItem("site") || ""
   );
@@ -58,6 +62,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await signup(data);
 
       if (response.data) {
+        
         setToken(response.data.token);
         localStorage.setItem("site", response.data.token);
         navigate("/dashboard");
@@ -76,6 +81,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Login
   async function loginAction(data: LoginRequest, domainName?: string) {
+    setLoadingLogin(true);
     try {
       if (domainName) {
       setOrgDomainName(domainName);
@@ -85,6 +91,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await login(data, safeOrgDomainName);
 
       if (response.data) {
+        setLoadingLogin(false);
         // setUser(response.data.username);
         setToken(response.data.token);
         localStorage.setItem("site", response.data.token);
@@ -97,6 +104,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         navigate("/dashboard");
       }
     } catch (err) {
+      setLoadingLogin(false);
       if (axios.isAxiosError(err)) {
         return (
           (err.response?.data as string) ||
@@ -153,6 +161,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         loginAction,
         logOut,
         setUserData,
+        loadingLogin
       }}
     >
       {children}

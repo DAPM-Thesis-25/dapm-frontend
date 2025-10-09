@@ -84,7 +84,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
         },
         
         {
-            label: "Access Requests",
+            label: "External Requests",
             path: "/dashboard/access-requests",
             icon: <AccountTreeIcon className="text-[#9427a9]" />,
             role: role.ADMIN,

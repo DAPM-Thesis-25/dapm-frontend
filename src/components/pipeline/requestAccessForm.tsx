@@ -45,7 +45,8 @@ const RequestAccessForm: React.FC<RequestAccessFormProps> = ({ setOpenRequestAcc
     useEffect(() => {
         pe.getPes();
         pipeline.refreshPipelines(projectName);
-    }, [projectName])
+    }, [projectName,auth2.userData])
+
 
 
     const formik = useFormik({
@@ -120,7 +121,7 @@ const RequestAccessForm: React.FC<RequestAccessFormProps> = ({ setOpenRequestAcc
                             <option value="Superadmin">Super Admin</option>
                             } */}
                             <option value="">Select processing element</option>
-                            {pe?.processingElements?.map((pe) => (
+                            {pe?.processingElements?.filter(pe => pe.ownerOrganization !== auth2.userData?.organizationName).map((pe) => (
                                 <option key={pe.templateId} value={pe.templateId}>{pe.templateId}</option>
                             ))}
                         </select>

@@ -23,6 +23,7 @@ const UpgradePopup: React.FC<UpgradePopupProps> = ({ openUpgradePopup, setOpenUp
             voucher: '',
             orgName: orgName
         },
+        enableReinitialize: true,
         validationSchema: Yup.object({
             voucher: Yup.string().required('Voucher is required')
 

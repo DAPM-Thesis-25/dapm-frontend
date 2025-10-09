@@ -38,9 +38,10 @@ export default function ProcessingElements() {
             </div>
             {pe.processingElements && pe.processingElements.length > 0 && (
                 <div className="px-3 mt-5">
-                    {/* <div className="w-full md:p-7 p-5 text-2xl text-[#ff5722] font-semibold">
-                        Subscribers <span className="text-sm text-black ml-2">(wish to use our processing elements)</span>
-                    </div> */}
+                    <div className="w-full text-sm text-[#757575] mb-2">
+                        Access to Processing Elements depends on your subscription tier.
+                        You can only use external elements if your tier in the provider organization meets or exceeds the required level.
+                    </div>
 
                     <div className="grid 2xl:grid-cols-5 xl:grid-cols-4 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1   gap-6">
                         {pe.processingElements.map((processingElement) => (
