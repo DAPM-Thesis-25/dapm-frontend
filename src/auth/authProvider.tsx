@@ -82,6 +82,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Login
   async function loginAction(data: LoginRequest, domainName?: string) {
     setLoadingLogin(true);
+    console.log("Attempting login with domain:", domainName);
     try {
       if (domainName) {
       setOrgDomainName(domainName);

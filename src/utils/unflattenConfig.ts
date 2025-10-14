@@ -40,3 +40,21 @@ export function normalizeConfig(config: any): any {
 
   return copy;
 }
+
+export function flattenConfig(obj: any, prefix = "", res: any = {}): any {
+  if (typeof obj !== "object" || obj === null) return res;
+
+  for (const key in obj) {
+    if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+    const val = obj[key];
+    const newKey = prefix ? `${prefix}.${key}` : key;
+
+    if (typeof val === "object" && !Array.isArray(val) && val !== null) {
+      flattenConfig(val, newKey, res);
+    } else {
+      res[newKey] = val;
+    }
+  }
+
+  return res;
+}

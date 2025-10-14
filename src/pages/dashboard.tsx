@@ -10,6 +10,7 @@ import AccessRequestPage from "./accessRequest";
 import Projects from "./projects";
 import ProjectLayout from "./project.tsx/ProjectLayout";
 import PipelineNavbar from "../components/pipeline/pipelineNavbar";
+import ProjectPrivateRoute from "../router/ProjectPrivateRoute";
 
 export default function Dashboard() {
     const [size, setSize] = useState(false);
@@ -44,18 +45,21 @@ export default function Dashboard() {
             }
             <div className={`grow xl:w-[80%] lg:w-[80%] md:w-[80%] w-full flex flex-col h-full  transition-all duration-300 ease-in-out `}>
 
-                {(!hideSidebar) ? 
-                <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} /> 
-                : <PipelineNavbar />}
+                {(!hideSidebar) ?
+                    <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} />
+                    : <PipelineNavbar />}
                 {/* <Navbar isOpen={isOpen} setIsOpen={setIsOpen} size={size} /> */}
                 <Routes>
-                    <Route path="/" element={<Navigate to="projects" />} />
+                    <Route path="/" element={<Navigate to="users" />} />
                     <Route path="users" element={<Users />} />
                     <Route path="partners" element={<Partners />} />
                     <Route path="processing-elements" element={<ProcessingElements />} />
                     <Route path="access-requests" element={<AccessRequestPage />} />
                     <Route path="projects" element={<Projects />} />
-                    <Route path="projects/:projectName/*" element={<ProjectLayout />} />
+                    {/* <Route path="projects/:projectName/*" element={<ProjectLayout />} /> */}
+                    <Route element={<ProjectPrivateRoute />}>
+                        <Route path="projects/:projectName/*" element={<ProjectLayout />} />
+                    </Route>
                 </Routes>
             </div>
         </div>

@@ -1,5 +1,6 @@
 import { Node, Edge } from "@xyflow/react";
 import { applyLayout } from "./applyLayout";
+import { flattenConfig } from "./unflattenConfig";
 
 interface DBPipeline {
   validatedPipeline: {
@@ -45,7 +46,7 @@ export function dbPipelineToGraph(
       data: {
         label: pe.templateID,
         type: nodeType,
-        config: pe.configuration?.configuration ?? pe.configuration ?? {},
+        config: flattenConfig(pe.configuration?.configuration ?? pe.configuration ?? {}),
       },
     });
   });

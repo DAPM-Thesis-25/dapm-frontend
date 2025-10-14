@@ -18,6 +18,8 @@ import { usePipeline } from "../../context/pipelineProvider";
 import { useLocation } from "react-router-dom";
 import { initiatePeerRequest, PipelineProcessingElementRequestDto } from "../../api/pipeline";
 import { useAccessRequest } from "../../context/accessRequestsProvider";
+import { useOrg } from "../../context/orgsProvider";
+import { ProcessingElement } from "../../api/processingElements";
 // import { useUsers } from "../../auth/usersProvider";
 
 interface RequestAccessFormProps {
@@ -37,6 +39,8 @@ const RequestAccessForm: React.FC<RequestAccessFormProps> = ({ setOpenRequestAcc
     const [pathname, setPathname] = useState(location.pathname);
     const projectName = pathname.split("/")[3];
     const acc = useAccessRequest();
+    const org=useOrg();
+    const [selectedPe, setSelectedPe] = useState<ProcessingElement | null>(null);
 
     useEffect(() => {
         setPathname(location.pathname);
@@ -45,7 +49,15 @@ const RequestAccessForm: React.FC<RequestAccessFormProps> = ({ setOpenRequestAcc
     useEffect(() => {
         pe.getPes();
         pipeline.refreshPipelines(projectName);
+        org.getPublishers();
     }, [projectName,auth2.userData])
+
+    function checkMaxHours(orgName:string): number {
+        const organization = org?.publishers?.find(o => o.name === orgName);
+        if (organization?.tier==="BASIC") return 100;
+        if (organization?.tier==="PREMIUM") return 1000;
+        return 0; // Default or unknown tier
+    }
 
 
 
@@ -113,7 +125,12 @@ const RequestAccessForm: React.FC<RequestAccessFormProps> = ({ setOpenRequestAcc
                             // placeholder=""
                             className="w-full p-0 select priority-select  bg-[#15283c] border-none focus:border-none text-white"
                             name="processingElement"
-                            onChange={formik.handleChange}
+                            onChange={
+                                (e) => {
+                                    formik.handleChange(e);
+                                    setSelectedPe(pe.processingElements?.find(p => p.templateId === e.target.value) || null);
+                                }
+                            }
                             onBlur={formik.handleBlur}
                             value={formik.values.processingElement}
                             aria-label="Project status">
@@ -178,8 +195,14 @@ const RequestAccessForm: React.FC<RequestAccessFormProps> = ({ setOpenRequestAcc
                         <div className="text-red-500 text-xs text-start mt-1">{formik.errors.requestedDurationHours}</div>
                     ) : null}
                 </div>
+                
 
             </div>
+            {selectedPe && (
+            <p className="text-sm text-yellow-500 ">
+                Warning : Requesting more than {checkMaxHours(selectedPe?.ownerOrganization || "")} hours which your organization's subscription tier allows in {selectedPe?.ownerOrganization}, means you need to wait for manual approval.
+            </p>
+            )}
 
             <div className="w-full flex items-end grow justify-self-end   justify-center mt-8">
                 <button type="submit" className="text-white text-xl sm:w-fit w-full sm:px-10 p-2 px-6 bg-[#15283c] hover:bg-[#ff5722] border-2 border-white rounded-md">Request</button>

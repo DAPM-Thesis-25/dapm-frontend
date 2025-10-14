@@ -42,9 +42,11 @@ export default function Users() {
                 {authUser.userData?.orgRole == "ADMIN" && userData.users && userData.users.map((user) => (
                     <div key={user.username} className="bg-white 2xl:p-5 p-3 h-40 flex items-center shadow-md rounded-md">
                         <img className="2xl:w-24 2xl:h-24 md:w-16 md:h-16 rounded-full" src={randomeProfile()} />
-                        <div className="2xl:text- xl:text-lg 2xl:ml-2">
+                        <div className="2xl:text- xl:text-lg 2xl:ml-2 overflow-hidden">
                             <p className="font-medium">{user.username[0].toUpperCase()}{user.username.slice(1)}</p>
-                            <p className="font-medium text-gray-500 2xl:text-lg text-sm">{user.email}</p>
+                            <p 
+                            title={user.email}
+                            className="font-medium text-gray-500 2xl:text-lg text-sm truncate">{user.email}</p>
                             <p className="font-medium text-[#ff5722]">{user.orgRoleName}</p>
                         </div>
                     </div>

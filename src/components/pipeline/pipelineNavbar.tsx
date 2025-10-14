@@ -87,7 +87,7 @@ export default function PipelineNavbar() {
 
                                 }}
                             >
-                                Check Configuration
+                                Check Missing Permissions
                             </button>
                         ) : draft.status === "configured" && !actionLoading.build ? (
                             <button

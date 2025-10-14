@@ -24,6 +24,7 @@ interface OrgContextType {
     loadingUpgrade: boolean;
     setLoadingUpgrade: (loading: boolean) => void;
     upgradeRequest: (upgrade: UpgradeRequest) => Promise<{ success: boolean; message: string; error?: string }>;
+    
 }
 
 const OrgContext = createContext<OrgContextType | undefined>(undefined);

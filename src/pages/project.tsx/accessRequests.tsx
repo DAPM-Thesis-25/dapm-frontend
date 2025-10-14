@@ -98,7 +98,7 @@ export default function InetrnalAccessRequestPage() {
             </div>
             <div className="table-body w-full ">
                 {currentAccessRequests.length ? currentAccessRequests.map((request) => (
-                    <div className="text-center cursor-pointer text-black p-2 table-header w-full grid grid-cols-4  table-tr rounded  mt-2 drop-shadow-2xl">
+                    <div className="text-center  text-black p-2 table-header w-full grid grid-cols-4  table-tr rounded  mt-2 drop-shadow-2xl">
                         <div className="table-row-item ">{request.templateId}</div>
                         <div className="table-row-item ">
                             {request.requestedDurationHours}

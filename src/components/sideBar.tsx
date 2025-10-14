@@ -58,12 +58,7 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
             icon: <AccountTreeIcon className="text-[#009688]" />,
             role: role.USER,
         },
-        {
-            label: "Projects",
-            path: "/dashboard/projects",
-            icon: <AccountTreeIcon className="text-[#009688]" />,
-            role: role.ADMIN,
-        },
+        
         {
             label: "Users",
             path: "/dashboard/users",
@@ -80,6 +75,12 @@ export default function SideBar({ isOpen, size, setIsOpen }: { isOpen: boolean; 
             label: "Processing Elements",
             path: "/dashboard/processing-elements",
             icon: <TerminalIcon className="text-[#2196f3]" />,
+            role: role.ADMIN,
+        },
+        {
+            label: "Projects",
+            path: "/dashboard/projects",
+            icon: <AccountTreeIcon className="text-[#009688]" />,
             role: role.ADMIN,
         },
         

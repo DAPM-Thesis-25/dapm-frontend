@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { usePipeline } from "../../context/pipelineProvider";
 import { ConfigureValidation } from "../../api/pipeline";
+import { useProject } from "../../context/projectProvider";
+import { Navigate, useLocation, useNavigate } from "react-router";
 
 interface CheckPipelineConfigProps {
     pipelineName?: string;
@@ -10,6 +12,13 @@ export default function CheckPipelineConfig({ pipelineName }: CheckPipelineConfi
     const { checkConfigStatus } = usePipeline();
     const [status, setStatus] = useState<ConfigureValidation | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const proj = useProject();
+    const location = useLocation();
+
+    // derive projectName like your other screens do
+    const pathname = location.pathname;
+    const projectName = pathname.split("/")[3] || "default";
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!pipelineName) return;
@@ -42,6 +51,22 @@ export default function CheckPipelineConfig({ pipelineName }: CheckPipelineConfi
                     </div>
                 </div>
             )}
+            {
+                proj.projectRolePermActions?.some(
+                    (perm) => perm.action === "VALIDATE_PIPELINE"
+                ) ?
+                    (
+                        <div className="w-full flex justify-center">
+                            <button
+                                onClick={() => navigate(`/dashboard/projects/${projectName}/access-requests`)}
+                                className="bg-[#ff5722] text-white px-4 py-2 rounded mt-4 hover:bg-[#e64a19]"
+                            >
+                                Go to access request
+                            </button>
+                        </div>
+                    )
+                    : true
+            }
         </div>
     );
 }

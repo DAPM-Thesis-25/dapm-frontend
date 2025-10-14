@@ -323,6 +323,7 @@ export default function PipelineDesign() {
                 )}
             </label>
             <input
+            readOnly={draft?.status !== "draft"}
               type={def.type === "number" ? "number" : "text"}
               className="w-full p-2 rounded text-black"
               value={val}
