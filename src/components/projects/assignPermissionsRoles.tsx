@@ -30,7 +30,7 @@ export default function AssignPermissionsRoles({ setOpenCreateProjectPopup, proj
     return (
         <div className="">
             <h2 className="sm:text-2xl text-xl font-bold mb-2 sm:mt-0 mt-5 text-[#ff5722]">Assigned Permissions</h2>
-            <p className="text-sm text-[#ffffff4d]">These are the default permissions assigned to the 2 main roles in the project {projectName}. You can create customized projects with assigned permissions on your own later from the project page.
+            <p className="text-sm text-[#ffffff4d]">These are the default permissions assigned to the 2 main roles in the project {projectName}. You can create customized roles with assigned permissions on your own later from the project page.
             </p>
             <div className="w-full flex flex-wrap gap-2 mt-8">
                 <h4 className="w-full sm:text-xl text-base font-semibold text-white">Leader Permissions</h4>
