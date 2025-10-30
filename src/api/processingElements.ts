@@ -69,7 +69,7 @@ export const createProcessingElement = (
     `/api/templates/uploadNewProcessingElement`,
     formData,
     {
-      baseURL: `http://localhost:${orgDomainName}`,
+      baseURL: `http://dapm2:${orgDomainName}`,
       headers: { "Content-Type": "multipart/form-data" },
     }
   );
@@ -77,4 +77,4 @@ export const createProcessingElement = (
 
 export const getPeFromPublisher = (orgDomainName: string, handshakeData: sendHandshakeRequest) =>
     axiosInstance.post<{ message: string }>(`/api/external-peer-configs/sync-peer-configs`, handshakeData,
-    { baseURL: `http://localhost:${orgDomainName}` } );
+    { baseURL: `http://dapm2:${orgDomainName}` } );
