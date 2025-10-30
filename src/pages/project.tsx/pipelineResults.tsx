@@ -27,6 +27,7 @@ useEffect(() => {
                 if (!pipelineName || document.hidden) return;
                 const orgDomainName = localStorage.getItem("domain") || "";
                 const res = await getPipelinePetriNet(orgDomainName, pipelineName);
+                console.log("Fetched PetriNet DOT:", res.data);
                 setDot(res.data);
             } catch (err) {
                 console.error("Failed to fetch PetriNet DOT:", err);

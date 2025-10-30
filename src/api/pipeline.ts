@@ -103,5 +103,5 @@ export const initiatePeerRequest = (
     axiosInstance.post<RequestResponse>(
         `/api/pipeline/configuration/request`,
         request,
-        { baseURL: `http://localhost:${orgDomainName}` }
+        { baseURL: `http://dapm2:${orgDomainName}` }
     );

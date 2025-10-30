@@ -27,7 +27,7 @@ export interface UploadProcessingElementRequest {
     // create a get all users function
 export const getAllProcessingElements = (orgDomainName: string) => 
     axiosInstance.get<ProcessingElement[]>(`/api/processingElements`,
-    { baseURL: `http://localhost:${orgDomainName}` } );
+    { baseURL: `http://dapm2:${orgDomainName}` } );
 
 // export const getAllSubscribers = (orgDomainName: string) => 
 //     axiosInstance.get<Org[]>(`/api/partner-organizations/subscribers`,
